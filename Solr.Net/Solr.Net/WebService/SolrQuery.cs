@@ -38,17 +38,16 @@ namespace Solr.Net.WebService
             return this;
         }
 
-        public void Execute()
+        public SolrQueryResponse<TDocument> Execute()
         {
-            var requestObject = new
+            var query = new SolrRequest
             {
                 Query = _query,
                 Offset = _offset,
                 Limit = _limit,
                 Filters = _filters
             };
-            var serializeObject = JsonConvert.SerializeObject(requestObject);
-            Console.WriteLine(serializeObject);
+            return _client.Get<TDocument>(query);
         }
     }
 }

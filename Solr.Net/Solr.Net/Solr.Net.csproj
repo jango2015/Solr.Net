@@ -36,6 +36,11 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -49,8 +54,15 @@
     <Compile Include="SolrRepository.cs" />
     <Compile Include="WebService\SolrClient.cs" />
     <Compile Include="WebService\SolrQuery.cs" />
+    <Compile Include="WebService\SolrQueryResponse.cs" />
+    <Compile Include="WebService\SolrRequest.cs" />
+    <Compile Include="WebService\SolrAddRequest.cs" />
+    <Compile Include="WebService\SolrResponseError.cs" />
+    <Compile Include="WebService\SolrResponseHeader.cs" />
+    <Compile Include="WebService\SolrResponse.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
