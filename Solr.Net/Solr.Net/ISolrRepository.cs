@@ -1,9 +1,10 @@
 ﻿using System.Linq;
+using Solr.Net.WebService;
 
 namespace Solr.Net
 {
     public interface ISolrRepository
     {
-        IQueryable<T> Get<T>() where T : new();
+        SolrQuery<TDocument> Get<TDocument>(string query) where TDocument : new();
     }
 }

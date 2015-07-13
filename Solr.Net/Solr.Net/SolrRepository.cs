@@ -1,16 +1,18 @@
 ﻿using System.Linq;
+using Solr.Net.Linq;
+using Solr.Net.WebService;
 
 namespace Solr.Net
 {
     public class SolrRepository : ISolrRepository
     {
-        public SolrRepository(string queryUrl)
+        public SolrRepository(string solrEndpoint)
         {
             
         }
-        public IQueryable<T> Get<T>() where T : new()
+        public SolrQuery<TDocument> Get<TDocument>(string query) where TDocument : new()
         {
-            return new SolrQueryable<T>();
+            return new SolrQuery<TDocument>(new SolrClient(), query);
         }
     }
 }

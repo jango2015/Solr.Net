@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Solr.Net.Test
 {
@@ -12,15 +10,21 @@ namespace Solr.Net.Test
         [TestMethod]
         public void TestMethod1()
         {
-            var count = new SolrRepository("").Get<UnitTest1>().ToList();
-            Assert.AreEqual(10, count.Count);
+            new SolrRepository("").Get<UnitTest1>("Test").Execute();
+            //Assert.AreEqual(10, count.Count);
         }
 
         [TestMethod]
         public void TestMethod2()
         {
-            var count = new SolrRepository("").Get<UnitTest1>().Where(x => x.Name == "Test").ToList();
-            Assert.AreEqual(0, count.Count);
+            new SolrRepository("")
+                .Get<UnitTest1>("Test")
+                .Filter(x => x.Name == "Te\"st")
+                .Filter(x => x.Name.Equals("ASDF") && x.Name == "A")
+                .Take(19)
+                .Skip(5)
+                .Execute();
+            //Assert.AreEqual(10, count.Count);
         }
     }
 }
