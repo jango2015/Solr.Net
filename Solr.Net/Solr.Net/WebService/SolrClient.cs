@@ -18,10 +18,10 @@ namespace Solr.Net.WebService
             QueryUrl = string.Format("{0}/query", baseAddress);
         }
 
-        public async void Add(object document)
+        public async Task Add(object document)
         {
-            var request = new SolrAddRequest(document);
-            await PostAsJsonAsync<SolrAddRequest, SolrResponse>(UpdateUrl, request);
+            var request = new SolrUpdateRequest {Add = new SolrAddRequest(document)};
+            await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(UpdateUrl, request);
         }
 
         private async Task<TResponse> PostAsJsonAsync<TRequest, TResponse>(string url, TRequest request)
@@ -29,10 +29,11 @@ namespace Solr.Net.WebService
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            //Console.WriteLine(JsonConvert.SerializeObject(request));
             var response = await client.PostAsJsonAsync(url, request);
             if (!response.IsSuccessStatusCode)
             {
-                var responseString = response.Content.ReadAsStringAsync();
+                var responseString = await response.Content.ReadAsStringAsync();
                 throw new HttpRequestException(string.Format("Request failed with statuscode {0} {1}: {2}",
                     (int) response.StatusCode, response.ReasonPhrase, responseString));
             }

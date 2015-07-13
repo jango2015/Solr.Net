@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Threading.Tasks;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Solr.Net.WebService;
 
 namespace Solr.Net.Test
@@ -10,13 +11,13 @@ namespace Solr.Net.Test
 
         public UnitTest1()
         {
-            _solrClient = new SolrClient("http://localhost:8983/solr/#/catalog");
+            _solrClient = new SolrClient("http://localhost:8983/solr/catalog");
         }
 
         [TestMethod]
-        public void AddDocument()
+        public async Task AddDocument()
         {
-            new SolrRepository(_solrClient).Add(new
+            await new SolrRepository(_solrClient).Add(new
             {
                 Id = "change.me",
                 Title = "UnitTest1"

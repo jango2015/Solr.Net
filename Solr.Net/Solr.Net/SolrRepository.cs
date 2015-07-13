@@ -1,4 +1,5 @@
-﻿using Solr.Net.WebService;
+﻿using System.Threading.Tasks;
+using Solr.Net.WebService;
 
 namespace Solr.Net
 {
@@ -11,9 +12,9 @@ namespace Solr.Net
             _client = client;
         }
 
-        public void Add(object document)
+        public async Task Add(object document)
         {
-            _client.Add(document);
+            await _client.Add(document);
         }
 
         public SolrQuery<TDocument> Get<TDocument>(string query) where TDocument : new()
