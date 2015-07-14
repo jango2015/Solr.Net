@@ -1,9 +1,18 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace Solr.Net.WebService
 {
     public class SolrQueryResponse<TDocument> : SolrResponse
     {
-        public IEnumerable<TDocument> Documents { get; set; }
+        public ResponseNode Response { get; set; }
+
+        public class ResponseNode
+        {
+            public int NumFound { get; set; }
+            public int Start { get; set; }
+            [JsonProperty(PropertyName = "docs")]
+            public IEnumerable<TDocument> Documents { get; set; }
+        }
     }
 }

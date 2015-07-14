@@ -2,11 +2,17 @@
 using System.Linq.Expressions;
 using System.Text;
 
-namespace Solr.Net.Linq
+namespace Solr.Net.Serialization
 {
-    class SolrQueryTranslator : ExpressionVisitor
+    class SolrExpressionTranslator : ExpressionVisitor
     {
+        private readonly IFieldResolver _fieldResolver;
         private StringBuilder _query;
+
+        public SolrExpressionTranslator(IFieldResolver fieldResolver)
+        {
+            _fieldResolver = fieldResolver;
+        }
 
         public string Translate(Expression expression)
         {
@@ -85,7 +91,7 @@ namespace Solr.Net.Linq
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
-            if (node.Method.Name == "Equals")
+            if (node.Method.Name == "Equals" || node.Method.Name == "Contains")
             {
                 if (node.Arguments.Count >= 1)
                 {
@@ -110,7 +116,7 @@ namespace Solr.Net.Linq
         {
             if (node.Expression == null || node.Expression.NodeType != ExpressionType.Parameter)
                 throw new NotSupportedException(string.Format("The member '{0}' is not supported", node.Member.Name));
-            _query.Append(node.Member.Name);
+            _query.Append(_fieldResolver.GetFieldName(node.Member));
             return node;
         }
     }

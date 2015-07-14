@@ -1,53 +1,46 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using Newtonsoft.Json;
-using Solr.Net.Linq;
+using System.Threading.Tasks;
 
 namespace Solr.Net.WebService
 {
     public class SolrQuery<TDocument> where TDocument : new()
     {
-        private readonly SolrClient _client;
-        private readonly string _query;
-        private int _limit = 50;
-        private int _offset = 0;
-        private readonly List<string> _filters = new List<string>();
-
+        public readonly SolrClient Client;
+        public readonly string Query;
+        public string QueryType = "dismax";
+        public int Limit = 50;
+        public int Offset = 0;
+        public readonly List<Expression<Func<TDocument, bool>>> Filters = new List<Expression<Func<TDocument, bool>>>();
+        
         public SolrQuery(SolrClient client, string query)
         {
-            _client = client;
-            _query = query;
+            Client = client;
+            Query = query;
         }
 
         public SolrQuery<TDocument> Filter(Expression<Func<TDocument, bool>> predicate)
         {
-            _filters.Add(new SolrQueryTranslator().Translate(predicate));
+            Filters.Add(predicate);
             return this;
         }
 
         public SolrQuery<TDocument> Skip(int n)
         {
-            _offset = n;
+            Offset = n;
             return this;
         }
 
         public SolrQuery<TDocument> Take(int n)
         {
-            _limit = n;
+            Limit = n;
             return this;
         }
 
-        public SolrQueryResponse<TDocument> Execute()
+        public async Task<SolrQueryResponse<TDocument>> Execute()
         {
-            var query = new SolrRequest
-            {
-                Query = _query,
-                Offset = _offset,
-                Limit = _limit,
-                Filters = _filters
-            };
-            return _client.Get<TDocument>(query);
+            return await Client.Get(this);
         }
     }
 }

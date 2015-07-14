@@ -5,7 +5,7 @@ namespace Solr.Net
 {
     public interface ISolrRepository
     {
-        Task Add(object document);
+        Task Add<TDocument>(TDocument document);
         SolrQuery<TDocument> Get<TDocument>(string query) where TDocument : new();
     }
 }

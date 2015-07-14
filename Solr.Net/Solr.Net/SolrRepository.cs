@@ -12,7 +12,7 @@ namespace Solr.Net
             _client = client;
         }
 
-        public async Task Add(object document)
+        public async Task Add<TDocument>(TDocument document)
         {
             await _client.Add(document);
         }
