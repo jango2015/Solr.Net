@@ -12,10 +12,12 @@ namespace Solr.Client.WebService
     public class SolrClient
     {
         private readonly ISolrConfiguration _configuration;
+        private readonly ISolrFieldResolver _fieldResolver;
 
-        public SolrClient(ISolrConfiguration configuration)
+        public SolrClient(ISolrConfiguration configuration, ISolrFieldResolver fieldResolver)
         {
             _configuration = configuration;
+            _fieldResolver = fieldResolver;
         }
 
         public async Task Add<TDocument>(TDocument document)
@@ -23,7 +25,7 @@ namespace Solr.Client.WebService
             var request = new SolrUpdateRequest { Add = new SolrAddRequest(document) };
             var settings = new JsonSerializerSettings
             {
-                Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_configuration.FieldResolver) }
+                Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_fieldResolver) }
             };
             await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request, settings);
         }
@@ -57,7 +59,7 @@ namespace Solr.Client.WebService
 
         public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query) where TDocument : new()
         {
-            var translator = new SolrExpressionTranslator(_configuration.FieldResolver);
+            var translator = new SolrExpressionTranslator(_fieldResolver);
             var request = new SolrQueryRequest
             {
                 Query = query.Query,
@@ -67,7 +69,7 @@ namespace Solr.Client.WebService
             };
             var settings = new JsonSerializerSettings
             {
-                Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_configuration.FieldResolver) }
+                Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_fieldResolver) }
             };
             return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TDocument>>(_configuration.QueryUrl, request, settings);
         }

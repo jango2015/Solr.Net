@@ -6,6 +6,5 @@ namespace Solr.Client
     {
         string UpdateUrl { get; }
         string QueryUrl { get; }
-        ISolrFieldResolver FieldResolver { get; }
     }
 }

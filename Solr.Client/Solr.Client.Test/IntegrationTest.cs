@@ -13,11 +13,8 @@ namespace Solr.Client.Test
 
         public IntegrationTest()
         {
-            var configuration = new DefaultSolrConfiguration("http://localhost:8983/solr/test")
-            {
-                FieldResolver = new CustomSolrFieldResolver()
-            };
-            _repository = new DefaultSolrRepository(configuration);
+            var configuration = new DefaultSolrConfiguration("http://localhost:8983/solr/test");
+            _repository = new DefaultSolrRepository(configuration, new CustomSolrFieldResolver());
         }
 
         [TestMethod]
