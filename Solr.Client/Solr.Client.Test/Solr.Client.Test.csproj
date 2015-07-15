@@ -54,7 +54,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Solr.Net\Solr.Client.csproj">
+    <ProjectReference Include="..\Solr.Client\Solr.Client.csproj">
       <Project>{1B7455B9-9449-4BDA-98B5-C2BC8B38C3E6}</Project>
       <Name>Solr.Client</Name>
     </ProjectReference>

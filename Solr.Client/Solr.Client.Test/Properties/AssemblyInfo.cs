@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Solr.Net.EPiServer")]
+[assembly: AssemblyTitle("Solr.Client.Test")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Solr.Net.EPiServer")]
+[assembly: AssemblyProduct("Solr.Client.Test")]
 [assembly: AssemblyCopyright("Copyright ©  2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("62fbde4e-8092-4f17-a544-77b18d0769bf")]
+[assembly: Guid("afc57388-9189-4756-9be9-e749fc849106")]
 
 // Version information for an assembly consists of the following four values:
 //

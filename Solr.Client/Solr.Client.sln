@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solr.Client", "Solr.Net\Solr.Client.csproj", "{1B7455B9-9449-4BDA-98B5-C2BC8B38C3E6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solr.Client", "Solr.Client\Solr.Client.csproj", "{1B7455B9-9449-4BDA-98B5-C2BC8B38C3E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solr.Client.Test", "Solr.Net.Test\Solr.Client.Test.csproj", "{D58D338C-1A77-4514-AF55-078FF569BF2F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Solr.Client.Test", "Solr.Client.Test\Solr.Client.Test.csproj", "{D58D338C-1A77-4514-AF55-078FF569BF2F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
