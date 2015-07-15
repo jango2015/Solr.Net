@@ -5,22 +5,17 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using Solr.Net.Serialization;
+using Solr.Client.Serialization;
 
-namespace Solr.Net.WebService
+namespace Solr.Client.WebService
 {
     public class SolrClient
     {
-        public String UpdateUrl { get; set; }
-        public String QueryUrl { get; set; }
-        public IFieldResolver FieldResolver { get; set; }
+        private readonly ISolrConfiguration _configuration;
 
-        public SolrClient(string coreAddress)
+        public SolrClient(ISolrConfiguration configuration)
         {
-            var baseAddress = coreAddress.TrimEnd('/');
-            UpdateUrl = string.Format("{0}/update", baseAddress);
-            QueryUrl = string.Format("{0}/query", baseAddress);
-            FieldResolver = new DefaultFieldResolver();
+            _configuration = configuration;
         }
 
         public async Task Add<TDocument>(TDocument document)
@@ -28,9 +23,9 @@ namespace Solr.Net.WebService
             var request = new SolrUpdateRequest { Add = new SolrAddRequest(document) };
             var settings = new JsonSerializerSettings
             {
-                Converters = new List<JsonConverter> {new SolrJsonConverter<TDocument>(FieldResolver)}
+                Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_configuration.FieldResolver) }
             };
-            await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(UpdateUrl, request, settings);
+            await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request, settings);
         }
 
         private static async Task<TResponse> PostAsJsonAsync<TRequest, TResponse>(string url, TRequest request, JsonSerializerSettings settings = null)
@@ -62,7 +57,7 @@ namespace Solr.Net.WebService
 
         public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query) where TDocument : new()
         {
-            var translator = new SolrExpressionTranslator(FieldResolver);
+            var translator = new SolrExpressionTranslator(_configuration.FieldResolver);
             var request = new SolrQueryRequest
             {
                 Query = query.Query,
@@ -72,9 +67,9 @@ namespace Solr.Net.WebService
             };
             var settings = new JsonSerializerSettings
             {
-                Converters = new List<JsonConverter> {new SolrJsonConverter<TDocument>(FieldResolver)}
+                Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_configuration.FieldResolver) }
             };
-            return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TDocument>>(QueryUrl, request, settings);
+            return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TDocument>>(_configuration.QueryUrl, request, settings);
         }
     }
 }

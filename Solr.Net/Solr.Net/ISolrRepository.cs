@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
-using Solr.Net.WebService;
+using Solr.Client.WebService;
 
-namespace Solr.Net
+namespace Solr.Client
 {
     public interface ISolrRepository
     {

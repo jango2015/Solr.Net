@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace Solr.Net.WebService
+namespace Solr.Client.WebService
 {
     public class SolrQuery<TDocument> where TDocument : new()
     {

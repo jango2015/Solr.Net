@@ -7,8 +7,8 @@
     <ProjectGuid>{1B7455B9-9449-4BDA-98B5-C2BC8B38C3E6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Solr.Net</RootNamespace>
-    <AssemblyName>Solr.Net</AssemblyName>
+    <RootNamespace>Solr.Client</RootNamespace>
+    <AssemblyName>Solr.Client</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -48,6 +48,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ISolrConfiguration.cs" />
     <Compile Include="ISolrRepository.cs" />
     <Compile Include="Serialization\IFieldResolver.cs" />
     <Compile Include="Serialization\SolrExpressionTranslator.cs" />
@@ -69,6 +70,7 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="Solr.Net.nuspec" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

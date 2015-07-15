@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace Solr.Net.WebService
+namespace Solr.Client.WebService
 {
     public class SolrAddRequest
     {

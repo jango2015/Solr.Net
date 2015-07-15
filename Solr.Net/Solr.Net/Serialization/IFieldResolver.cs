@@ -1,7 +1,6 @@
-using System;
 using System.Reflection;
 
-namespace Solr.Net.Serialization
+namespace Solr.Client.Serialization
 {
     public interface IFieldResolver
     {

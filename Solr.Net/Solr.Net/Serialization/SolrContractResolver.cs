@@ -2,7 +2,7 @@ using System.Reflection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
-namespace Solr.Net.Serialization
+namespace Solr.Client.Serialization
 {
     public class SolrContractResolver : DefaultContractResolver
     {

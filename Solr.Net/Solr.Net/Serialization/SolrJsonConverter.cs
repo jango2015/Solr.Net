@@ -1,7 +1,7 @@
 ﻿using System;
 using Newtonsoft.Json;
 
-namespace Solr.Net.Serialization
+namespace Solr.Client.Serialization
 {
     public class SolrJsonConverter<TDocument> : JsonConverter
     {

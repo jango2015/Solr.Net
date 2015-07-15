@@ -2,43 +2,51 @@
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Solr.Net.Serialization;
-using Solr.Net.WebService;
+using Solr.Client.Serialization;
 
-namespace Solr.Net.Test
+namespace Solr.Client.Test
 {
     [TestClass]
-    public class UnitTest1
+    public class IntegrationTest
     {
-        private readonly SolrClient _solrClient;
+        private readonly SolrRepository _repository;
 
-        public UnitTest1()
+        public IntegrationTest()
         {
-            _solrClient = new SolrClient("http://localhost:8983/solr/test");
-            _solrClient.FieldResolver = new CustomFieldResolver();
+            var configuration = new DefaultSolrConfiguration("http://localhost:8983/solr/test")
+            {
+                FieldResolver = new CustomFieldResolver()
+            };
+            _repository = new SolrRepository(configuration);
         }
 
         [TestMethod]
         public async Task AddDocument()
         {
-            await new SolrRepository(_solrClient).Add(new TestDocument
+            await _repository.Add(new TestDocument1
             {
                 Id = "test",
                 Title = "UnitTest1"
+            });
+            await _repository.Add(new TestDocument2
+            {
+                Id = "test",
+                Title = "UnitTest1",
+                Test = "Dette er en test-tekst."
             });
         }
 
         [TestMethod]
         public async Task TestMethod1()
         {
-            var r1 = await new SolrRepository(_solrClient).Get<TestDocument>("Test").Execute();
+            var r1 = await _repository.Get<TestDocument1>("Test").Execute();
             Assert.AreEqual(1, r1.Response.Documents.Count());
-            var r2 = await new SolrRepository(_solrClient).Get<TestDocument>("Hest").Execute();
+            var r2 = await _repository.Get<TestDocument1>("Hest").Execute();
             Assert.AreEqual(0, r2.Response.Documents.Count());
             var r3 =
                 await
-                    new SolrRepository(_solrClient)
-                        .Get<TestDocument>("*")
+                    _repository
+                        .Get<TestDocument1>("*")
                         .Filter(x => x.Title.Contains("UnitTest1"))
                         .Execute();
             Assert.AreEqual(1, r3.Response.Documents.Count());
@@ -57,10 +65,15 @@ namespace Solr.Net.Test
             //Assert.AreEqual(10, count.Count);
         }
 
-        public class TestDocument
+        public class TestDocument1
         {
             public string Id { get; set; }
             public string Title { get; set; }
+        }
+
+        public class TestDocument2 : TestDocument1
+        {
+            public string Test { get; set; }
         }
     }
 

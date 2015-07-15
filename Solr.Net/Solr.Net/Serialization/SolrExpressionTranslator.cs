@@ -2,7 +2,7 @@
 using System.Linq.Expressions;
 using System.Text;
 
-namespace Solr.Net.Serialization
+namespace Solr.Client.Serialization
 {
     class SolrExpressionTranslator : ExpressionVisitor
     {

@@ -1,4 +1,4 @@
-﻿namespace Solr.Net.WebService
+﻿namespace Solr.Client.WebService
 {
     public class SolrResponseHeader
     {

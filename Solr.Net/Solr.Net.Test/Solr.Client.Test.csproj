@@ -6,8 +6,8 @@
     <ProjectGuid>{D58D338C-1A77-4514-AF55-078FF569BF2F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Solr.Net.Test</RootNamespace>
-    <AssemblyName>Solr.Net.Test</AssemblyName>
+    <RootNamespace>Solr.Client.Test</RootNamespace>
+    <AssemblyName>Solr.Client.Test</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -50,13 +50,13 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="IntegrationTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Solr.Net\Solr.Net.csproj">
+    <ProjectReference Include="..\Solr.Net\Solr.Client.csproj">
       <Project>{1B7455B9-9449-4BDA-98B5-C2BC8B38C3E6}</Project>
-      <Name>Solr.Net</Name>
+      <Name>Solr.Client</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
