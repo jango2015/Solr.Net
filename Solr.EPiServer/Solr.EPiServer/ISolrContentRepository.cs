@@ -9,5 +9,6 @@ namespace Solr.EPiServer
     {
         Task Add(ContentReference contentReference);
         SolrQuery<TContent> Query<TContent>(string query, CultureInfo language = null) where TContent : IContent, new();
+        Task Remove(ContentReference contentLink);
     }
 }

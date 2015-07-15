@@ -32,5 +32,10 @@ namespace Solr.Client
                 return new SolrClient(_configruation, _fieldResolver);
             }
         }
+
+        public async Task Remove(object id)
+        {
+            await Client.Remove(id);
+        }
     }
 }

@@ -9,20 +9,32 @@ using Solr.Client.Serialization;
 
 namespace Solr.Client.WebService
 {
-    public class SolrClient
+    public class SolrClient : IDisposable
     {
         private readonly ISolrConfiguration _configuration;
         private readonly ISolrFieldResolver _fieldResolver;
+        private readonly HttpClient _httpClient;
 
         public SolrClient(ISolrConfiguration configuration, ISolrFieldResolver fieldResolver)
         {
             _configuration = configuration;
             _fieldResolver = fieldResolver;
+            _httpClient = new HttpClient();
         }
 
-        public async Task Add<TDocument>(TDocument document)
+        public async Task Commit()
         {
-            var request = new SolrUpdateRequest { Add = new SolrAddRequest(document) };
+            var request = new SolrUpdateRequest {Commit = new object()};
+            await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request);
+        }
+
+        public async Task Add<TDocument>(TDocument document, bool commit = true)
+        {
+            var request = new SolrUpdateRequest
+            {
+                Add = new SolrAddRequest(document),
+                Commit = commit ? new object() : null
+            };
             var settings = new JsonSerializerSettings
             {
                 Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_fieldResolver) }
@@ -30,15 +42,15 @@ namespace Solr.Client.WebService
             await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request, settings);
         }
 
-        private static async Task<TResponse> PostAsJsonAsync<TRequest, TResponse>(string url, TRequest request, JsonSerializerSettings settings = null)
+        private async Task<TResponse> PostAsJsonAsync<TRequest, TResponse>(string url, TRequest request,
+            JsonSerializerSettings settings = null)
             where TResponse : SolrResponse
         {
-            var client = new HttpClient();
             var requestString = JsonConvert.SerializeObject(request, settings);
             Console.WriteLine("< {0}", requestString);
             var content = new StringContent(requestString);
             content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
-            var response = await client.PostAsync(url, content);
+            var response = await _httpClient.PostAsync(url, content);
             var responseString = await response.Content.ReadAsStringAsync();
             Console.WriteLine("> {0}", responseString);
             if (!response.IsSuccessStatusCode)
@@ -72,6 +84,21 @@ namespace Solr.Client.WebService
                 Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_fieldResolver) }
             };
             return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TDocument>>(_configuration.QueryUrl, request, settings);
+        }
+
+        public async Task Remove(object id, bool commit = true)
+        {
+            var request = new SolrUpdateRequest
+            {
+                Remove = new SolrDeleteRequest(id),
+                Commit = commit ? new object() : null
+            };
+            await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request);
+        }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
         }
     }
 }

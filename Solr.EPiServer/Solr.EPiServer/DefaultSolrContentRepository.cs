@@ -20,7 +20,7 @@ namespace Solr.EPiServer
 
         public async Task Add(ContentReference contentReference)
         {
-            var updateRepository = new DefaultSolrRepository(_solrConfiguration, new DefaultSolrFieldResolver());
+            var updateRepository = new DefaultSolrRepository(_solrConfiguration);
             await updateRepository.Add(contentReference);
         }
 
@@ -29,6 +29,12 @@ namespace Solr.EPiServer
             var fieldResolver = new EpiSolrFieldResolver(language ?? LanguageSelector.AutoDetect(false).Language);
             var queryRepository = new DefaultSolrRepository(_solrConfiguration, fieldResolver);
             return queryRepository.Get<TContent>(query);
+        }
+
+        public async Task Remove(ContentReference contentReference)
+        {
+            var updateRepository = new DefaultSolrRepository(_solrConfiguration);
+            await updateRepository.Remove(contentReference.ID);
         }
     }
 }

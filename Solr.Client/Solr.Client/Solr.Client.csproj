@@ -60,6 +60,7 @@
     <Compile Include="WebService\SolrClient.cs" />
     <Compile Include="Serialization\SolrContractResolver.cs" />
     <Compile Include="Serialization\SolrJsonConverter.cs" />
+    <Compile Include="WebService\SolrDeleteRequest.cs" />
     <Compile Include="WebService\SolrQuery.cs" />
     <Compile Include="WebService\SolrQueryResponse.cs" />
     <Compile Include="WebService\SolrQueryRequest.cs" />

@@ -13,17 +13,27 @@ namespace Solr.EPiServer
         public void Initialize(InitializationEngine context)
         {
             var contentEvents = ServiceLocator.Current.GetInstance<IContentEvents>();
-            contentEvents.PublishedContent += contentEvents_PublishedContent;
+            contentEvents.PublishedContent += ContentEventsOnPublishedContent;
+            contentEvents.RejectedContent += ContentEventsOnRejectedContent;
         }
 
-        private void contentEvents_PublishedContent(object sender, ContentEventArgs e)
+        private static async void ContentEventsOnPublishedContent(object sender, ContentEventArgs contentEventArgs)
         {
-            //throw new System.NotImplementedException();
+            var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
+            await solrContentRepository.Add(contentEventArgs.ContentLink);
+        }
+
+        private static async void ContentEventsOnRejectedContent(object sender, ContentEventArgs contentEventArgs)
+        {
+            var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
+            await solrContentRepository.Remove(contentEventArgs.ContentLink);
         }
 
         public void Uninitialize(InitializationEngine context)
         {
-            throw new System.NotImplementedException();
+            var contentEvents = ServiceLocator.Current.GetInstance<IContentEvents>();
+            contentEvents.PublishedContent -= ContentEventsOnPublishedContent;
+            contentEvents.RejectedContent -= ContentEventsOnRejectedContent;
         }
     }
 }

@@ -34,6 +34,30 @@ namespace Solr.Client.Test
         }
 
         [TestMethod]
+        public async Task RemoveDocument()
+        {
+            // ensure deleted
+            await _repository.Remove("test1");
+            // verify
+            var r1 = await _repository.Get<TestDocument1>("id:test1").Execute();
+            Assert.AreEqual(0, r1.Response.Documents.Count());
+            // add
+            await _repository.Add(new TestDocument1
+            {
+                Id = "test1",
+                Title = "UnitTest2"
+            });
+            // verify
+            var r2 = await _repository.Get<TestDocument1>("id:test1").Execute();
+            Assert.AreEqual(1, r2.Response.Documents.Count());
+            // delete
+            await _repository.Remove("test1");
+            // verify
+            var r3 = await _repository.Get<TestDocument1>("id:test1").Execute();
+            Assert.AreEqual(0, r3.Response.Documents.Count());
+        }
+
+        [TestMethod]
         public async Task TestMethod1()
         {
             var r1 = await _repository.Get<TestDocument1>("Test").Execute();

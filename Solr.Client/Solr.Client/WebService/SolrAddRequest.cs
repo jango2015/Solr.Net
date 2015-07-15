@@ -8,8 +8,8 @@ namespace Solr.Client.WebService
         public object Document;
         [JsonProperty(PropertyName = "boost")]
         public int Boost = 1;
-        [JsonProperty(PropertyName = "commitWithin")]
-        public int CommitWithin = 1000;
+        //[JsonProperty(PropertyName = "commitWithin")]
+        //public int CommitWithin = 1000;
         [JsonProperty(PropertyName = "overwrite")]
         public bool Overwrite = true;
 
