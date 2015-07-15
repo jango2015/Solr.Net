@@ -6,10 +6,10 @@ namespace Solr.Client.Serialization
 {
     class SolrExpressionTranslator : ExpressionVisitor
     {
-        private readonly IFieldResolver _fieldResolver;
+        private readonly ISolrFieldResolver _fieldResolver;
         private StringBuilder _query;
 
-        public SolrExpressionTranslator(IFieldResolver fieldResolver)
+        public SolrExpressionTranslator(ISolrFieldResolver fieldResolver)
         {
             _fieldResolver = fieldResolver;
         }

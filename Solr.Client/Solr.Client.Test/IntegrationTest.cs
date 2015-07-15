@@ -9,15 +9,15 @@ namespace Solr.Client.Test
     [TestClass]
     public class IntegrationTest
     {
-        private readonly SolrRepository _repository;
+        private readonly DefaultSolrRepository _repository;
 
         public IntegrationTest()
         {
             var configuration = new DefaultSolrConfiguration("http://localhost:8983/solr/test")
             {
-                FieldResolver = new CustomFieldResolver()
+                FieldResolver = new CustomSolrFieldResolver()
             };
-            _repository = new SolrRepository(configuration);
+            _repository = new DefaultSolrRepository(configuration);
         }
 
         [TestMethod]
@@ -77,7 +77,7 @@ namespace Solr.Client.Test
         }
     }
 
-    public class CustomFieldResolver : DefaultFieldResolver
+    public class CustomSolrFieldResolver : DefaultSolrFieldResolver
     {
         public override string GetFieldName(MemberInfo memberInfo)
         {

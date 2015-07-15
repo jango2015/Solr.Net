@@ -3,21 +3,21 @@ using Solr.Client.WebService;
 
 namespace Solr.Client
 {
-    public class SolrRepository : ISolrRepository
+    public class DefaultSolrRepository : ISolrRepository
     {
         private readonly ISolrConfiguration _configruation;
 
-        public SolrRepository(ISolrConfiguration configruation)
+        public DefaultSolrRepository(ISolrConfiguration configruation)
         {
             _configruation = configruation;
         }
 
-        public async Task Add<TDocument>(TDocument document)
+        public virtual async Task Add<TDocument>(TDocument document)
         {
             await Client.Add(document);
         }
 
-        public SolrQuery<TDocument> Get<TDocument>(string query) where TDocument : new()
+        public virtual SolrQuery<TDocument> Get<TDocument>(string query) where TDocument : new()
         {
             return new SolrQuery<TDocument>(Client, query);
         }

@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Solr.Client.Serialization
 {
-    public class DefaultFieldResolver : IFieldResolver
+    public class DefaultSolrFieldResolver : ISolrFieldResolver
     {
         public virtual string GetFieldName(MemberInfo memberInfo)
         {

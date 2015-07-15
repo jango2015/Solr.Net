@@ -6,9 +6,9 @@ namespace Solr.Client.Serialization
 {
     public class SolrContractResolver : DefaultContractResolver
     {
-        private readonly IFieldResolver _fieldResolver;
+        private readonly ISolrFieldResolver _fieldResolver;
 
-        public SolrContractResolver(IFieldResolver fieldResolver)
+        public SolrContractResolver(ISolrFieldResolver fieldResolver)
         {
             _fieldResolver = fieldResolver;
         }

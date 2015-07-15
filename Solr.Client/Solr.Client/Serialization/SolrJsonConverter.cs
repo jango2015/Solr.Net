@@ -5,9 +5,9 @@ namespace Solr.Client.Serialization
 {
     public class SolrJsonConverter<TDocument> : JsonConverter
     {
-        private readonly IFieldResolver _fieldResolver;
+        private readonly ISolrFieldResolver _fieldResolver;
 
-        public SolrJsonConverter(IFieldResolver fieldResolver)
+        public SolrJsonConverter(ISolrFieldResolver fieldResolver)
         {
             _fieldResolver = fieldResolver;
         }

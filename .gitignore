@@ -188,3 +188,5 @@ GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
 /Solr.Client/packages
+/Solr.EPiServer/packages
+*.nupkg
