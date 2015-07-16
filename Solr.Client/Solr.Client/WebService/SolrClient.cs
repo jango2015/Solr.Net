@@ -76,6 +76,11 @@ namespace Solr.Client.WebService
 
         public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query)
         {
+            return await Get<TDocument, TDocument>(query);
+        }
+
+        public async Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQuery<TDocument> query)
+        {
             var translator = new SolrExpressionTranslator(_fieldResolver);
             var request = new SolrQueryRequest
             {
@@ -89,10 +94,10 @@ namespace Solr.Client.WebService
                 Converters = new List<JsonConverter>
                 {
                     new SolrDateTimeConverter(),
-                    new SolrJsonConverter<TDocument>(_fieldResolver)
+                    new SolrJsonConverter<TResult>(_fieldResolver)
                 }
             };
-            return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TDocument>>(_configuration.QueryUrl, request, settings);
+            return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TResult>>(_configuration.QueryUrl, request, settings);
         }
 
         public async Task Remove(object id, bool commit = true)

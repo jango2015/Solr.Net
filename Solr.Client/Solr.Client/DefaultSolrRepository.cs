@@ -22,7 +22,12 @@ namespace Solr.Client
 
         public virtual async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query)
         {
-            return await Client.Get(query);
+            return await Get<TDocument, TDocument>(query);
+        }
+
+        public virtual async Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQuery<TDocument> query)
+        {
+            return await Client.Get<TDocument, TResult>(query);
         }
 
         private SolrClient Client

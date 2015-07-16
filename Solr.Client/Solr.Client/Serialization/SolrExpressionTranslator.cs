@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Text;
 
 namespace Solr.Client.Serialization
@@ -30,7 +31,8 @@ namespace Solr.Client.Serialization
                     Visit(node.Operand);
                     break;
                 default:
-                    throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", node.NodeType));
+                    //throw new NotSupportedException(string.Format("The unary operator '{0}' is not supported", node.NodeType));
+                    return base.VisitUnary(node);
             }
             return node;
         }
@@ -72,7 +74,8 @@ namespace Solr.Client.Serialization
                 _query.Append("\"\"");
                 return node;
             }
-            switch (Type.GetTypeCode(node.Value.GetType()))
+            var valueType = node.Value.GetType();
+            switch (Type.GetTypeCode(valueType))
             {
                 case TypeCode.Boolean:
                     _query.Append(((bool)node.Value) ? 1 : 0);
@@ -91,6 +94,13 @@ namespace Solr.Client.Serialization
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
         {
+            if (node.Method.DeclaringType == typeof (SolrLiteral) && node.Arguments.Count > 0)
+            {
+                // the argument is a literal string; compute it and print it
+                var argument = Expression.Lambda(node.Arguments[0]).Compile().DynamicInvoke();
+                _query.Append(argument);
+                return node;
+            }
             if (node.Method.Name == "Equals" || node.Method.Name == "Contains")
             {
                 if (node.Arguments.Count >= 1)
@@ -114,10 +124,33 @@ namespace Solr.Client.Serialization
 
         protected override Expression VisitMember(MemberExpression node)
         {
-            if (node.Expression == null || node.Expression.NodeType != ExpressionType.Parameter)
-                throw new NotSupportedException(string.Format("The member '{0}' is not supported", node.Member.Name));
-            _query.Append(_fieldResolver.GetFieldName(node.Member));
-            return node;
+            if (node.Expression == null)
+            {
+                return base.VisitMember(node);
+            }
+            if (node.Expression.NodeType == ExpressionType.Parameter)
+            {
+                _query.Append(_fieldResolver.GetFieldName(node.Member));
+                return node;
+            }
+            if (node.Expression.NodeType == ExpressionType.Constant)
+            {
+                var container = ((ConstantExpression) node.Expression).Value;
+                var fieldInfo = node.Member as FieldInfo;
+                if (fieldInfo != null)
+                {
+                    VisitConstant(Expression.Constant(fieldInfo.GetValue(container)));
+                    return node;
+                }
+                var propertyInfo = node.Member as PropertyInfo;
+                if (propertyInfo != null)
+                {
+                    VisitConstant(Expression.Constant(propertyInfo.GetValue(container)));
+                    return node;
+                }
+            }
+            //throw new NotSupportedException(string.Format("The member '{0}' is not supported", node.Member.Name));
+            return base.VisitMember(node);
         }
     }
 }

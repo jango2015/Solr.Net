@@ -7,6 +7,7 @@ namespace Solr.Client
     {
         Task Add<TDocument>(TDocument document);
         Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query);
+        Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQuery<TDocument> query);
         Task Remove(object id);
     }
 }

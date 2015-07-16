@@ -8,7 +8,7 @@ namespace Solr.EPiServer
 {
     [ModuleDependency(typeof(ServiceContainerInitialization))]
     [InitializableModule]
-    public class Initialization : IInitializableModule
+    public class EpiSolrInitialization : IInitializableModule
     {
         public void Initialize(InitializationEngine context)
         {

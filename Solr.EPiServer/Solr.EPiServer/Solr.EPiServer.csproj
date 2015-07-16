@@ -125,9 +125,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Solr.Client, Version=1.1.5675.30042, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Solr.Client, Version=1.1.5675.36832, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Solr.Client.1.1.5675.30042\lib\net45\Solr.Client.dll</HintPath>
+      <HintPath>..\packages\Solr.Client.1.1.5675.36832\lib\net45\Solr.Client.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.6.4.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <Private>True</Private>
@@ -178,13 +178,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EpiSolrConfiguration.cs" />
+    <Compile Include="DefaultSolrConfiguration.cs" />
     <Compile Include="EpiSolrFieldResolver.cs" />
     <Compile Include="DefaultSolrContentRepository.cs" />
-    <Compile Include="Helpers\HtmlHelper.cs" />
-    <Compile Include="Initialization.cs" />
+    <Compile Include="Helpers\HtmlAgilityPackHelper.cs" />
+    <Compile Include="EpiSolrInitialization.cs" />
     <Compile Include="ISolrContentRepository.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="EpiSolrSearchResult.cs" />
+    <Compile Include="EpiSolrContentReference.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

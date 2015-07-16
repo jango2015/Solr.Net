@@ -4,7 +4,7 @@ using Solr.Client;
 namespace Solr.EPiServer
 {
     [ServiceConfiguration(ServiceType = typeof(ISolrConfiguration), Lifecycle = ServiceInstanceScope.Singleton)]
-    class EpiSolrConfiguration : ISolrConfiguration
+    class DefaultSolrConfiguration : ISolrConfiguration
     {
         public string UpdateUrl
         {

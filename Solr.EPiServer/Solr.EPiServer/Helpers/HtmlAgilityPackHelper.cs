@@ -5,7 +5,7 @@ namespace Solr.EPiServer.Helpers
 {
     // based on HtmlConvert from HtmlAgilityPack samples:
     // http://htmlagilitypack.codeplex.com/sourcecontrol/changeset/view/62772#52179
-    internal class HtmlHelper
+    internal class HtmlAgilityPackHelper
     {
         public static string ConvertHtml(string html)
         {

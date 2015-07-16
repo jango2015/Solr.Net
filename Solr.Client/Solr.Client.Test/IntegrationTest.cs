@@ -63,7 +63,7 @@ namespace Solr.Client.Test
         [TestMethod]
         public async Task TestMethod1()
         {
-            var r1 = await _repository.Get(new SolrQuery<TestDocument1>("Test"));
+            var r1 = await _repository.Get(new SolrQuery<TestDocument1>("UnitTest1"));
             Assert.AreEqual(1, r1.Response.Documents.Count());
             var r2 = await _repository.Get(new SolrQuery<TestDocument1>("Hest"));
             Assert.AreEqual(0, r2.Response.Documents.Count());

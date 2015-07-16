@@ -10,6 +10,7 @@ using EPiServer.DataAnnotations;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using Solr.Client;
+using Solr.Client.Serialization;
 using Solr.Client.WebService;
 using Solr.EPiServer.Helpers;
 
@@ -31,7 +32,11 @@ namespace Solr.EPiServer
         public async Task Add(ContentReference contentReference, IContent newContent = null)
         {
             _logger.Log(Level.Information, string.Format("Indexing contentReference {0}", contentReference.ID));
-            var documentContent = new Dictionary<string, object> {{"id", contentReference.ID}};
+            var documentContent = new Dictionary<string, object>
+            {
+                {"id", contentReference.ID},
+                {"_types_ss", GetInheritancHierarchy(newContent.GetOriginalType()).Select(x => x.FullName)}
+            };
             foreach (var languageBranch in GetLanguageBranches(contentReference, newContent))
             {
                 var languageName = GetLanguage(languageBranch);
@@ -64,7 +69,7 @@ namespace Solr.EPiServer
                         if (propertyInfo.PropertyType == typeof (XhtmlString))
                         {
                             var xhtmlString = (XhtmlString) fieldValue;
-                            fieldValue = HtmlHelper.ConvertHtml(xhtmlString.ToHtmlString());
+                            fieldValue = HtmlAgilityPackHelper.ConvertHtml(xhtmlString.ToHtmlString());
                         }
                         documentContent.Add(fieldName, fieldValue);
                         allValues.Add(fieldValue.ToString());
@@ -107,24 +112,47 @@ namespace Solr.EPiServer
                 : content.Property.LanguageBranch;
         }
 
-        public async Task<SolrQueryResponse<TContent>> Query<TContent>(SolrQuery<TContent> query, CultureInfo language = null) where TContent : IContent
+        public async Task<EpiSolrSearchResult<TContent>> Query<TContent>(SolrQuery<TContent> query, CultureInfo language = null) where TContent : IContent
         {
             var fieldResolver = new EpiSolrFieldResolver(language ?? LanguageSelector.AutoDetect(false).Language);
             var queryRepository = new DefaultSolrRepository(_solrConfiguration, fieldResolver);
-            var result = await queryRepository.Get(query);
+            // add type condition
+            var contentType = typeof (TContent).FullName;
+            query.Filter(x => SolrLiteral.String("_types_ss") == contentType);
+            // add publishstatus condition
+            if (typeof(IVersionable).IsAssignableFrom(typeof(TContent)))
+            {
+                var startName = fieldResolver.GetFieldName("StartPublish", typeof (DateTime));
+                var endName = fieldResolver.GetFieldName("StopPublish", typeof (DateTime));
+                // IMPORTANT: round to nearest order, in order to optimize cache!
+                // thus immediate expiration of content is done by setting expiration
+                // date to more than one hour ago
+                query.Filter(
+                    x =>
+                        SolrLiteral.String(startName) == SolrLiteral.String("[* TO NOW/HOUR]") &&
+                        SolrLiteral.String(endName) == SolrLiteral.String("[NOW/HOUR TO *]"));
+            }
+            // get only content links from result
+            var solrResult = await queryRepository.Get<TContent, EpiSolrContentReference>(query);
             // replace partial results with full results
             var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
             var completeDocuments = new List<TContent>();
-            foreach (var document in result.Response.Documents)
+            foreach (var document in solrResult.Response.Documents)
             {
+                ContentReference contentReference;
                 TContent completeDocument;
-                if (contentRepository.TryGet(document.ContentLink, language, out completeDocument))
+                if (ContentReference.TryParse(document.ContentLink, out contentReference) &&
+                    contentRepository.TryGet(contentReference, language, out completeDocument))
                 {
                     completeDocuments.Add(completeDocument);
                 }
             }
-            result.Response.Documents = completeDocuments;
-            return result;
+            var finalResult = new EpiSolrSearchResult<TContent>
+            {
+                Results = completeDocuments,
+                SolrQueryResponse = solrResult
+            };
+            return finalResult;
         }
 
         public async Task Remove(ContentReference contentReference)
@@ -157,6 +185,18 @@ namespace Solr.EPiServer
             if (!newContentLanguageExists)
             {
                 yield return newContent;
+            }
+        }
+
+        public static IEnumerable<Type> GetInheritancHierarchy(Type type)
+        {
+            for (var current = type; current != null; current = current.BaseType)
+            {
+                yield return current;
+            }
+            foreach (var @interface in type.GetInterfaces())
+            {
+                yield return @interface;
             }
         }
     }
