@@ -51,9 +51,8 @@ namespace Solr.EPiServer
 
         public async Task Remove(ContentReference contentReference)
         {
-            throw new NotImplementedException();
-            //var updateRepository = new DefaultSolrRepository(_solrConfiguration);
-            //await updateRepository.Remove(contentReference.ID);
+            var updateRepository = new DefaultSolrRepository(_solrConfiguration);
+            await updateRepository.Remove(contentReference.ID);
         }
     }
 }
