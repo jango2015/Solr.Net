@@ -20,9 +20,9 @@ namespace Solr.Client
             await Client.Add(document);
         }
 
-        public virtual SolrQuery<TDocument> Get<TDocument>(string query) where TDocument : new()
+        public virtual async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query) where TDocument : new()
         {
-            return new SolrQuery<TDocument>(Client, query);
+            return await Client.Get(query);
         }
 
         private SolrClient Client

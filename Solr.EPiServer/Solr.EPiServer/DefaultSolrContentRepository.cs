@@ -71,6 +71,10 @@ namespace Solr.EPiServer
                     }
                     var allName = fieldResolver.GetDefaultFieldName();
                     AddOrReplace(documentContent, allName, allValues);
+                    // add content link
+                    AddOrReplace(documentContent,
+                        fieldResolver.GetFieldName("ContentLink", typeof (ContentReference)),
+                        languageBranch.ContentLink);
                     // add publishing information
                     var versionable = languageBranch as IVersionable;
                     if (versionable != null)
@@ -103,11 +107,24 @@ namespace Solr.EPiServer
                 : content.Property.LanguageBranch;
         }
 
-        public SolrQuery<TContent> Query<TContent>(string query, CultureInfo language = null) where TContent : IContent, new()
+        public async Task<SolrQueryResponse<TContent>> Query<TContent>(SolrQuery<TContent> query, CultureInfo language = null) where TContent : IContent, new()
         {
             var fieldResolver = new EpiSolrFieldResolver(language ?? LanguageSelector.AutoDetect(false).Language);
             var queryRepository = new DefaultSolrRepository(_solrConfiguration, fieldResolver);
-            return queryRepository.Get<TContent>(query);
+            var result = await queryRepository.Get(query);
+            // replace partial results with full results
+            var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
+            var completeDocuments = new List<TContent>();
+            foreach (var document in result.Response.Documents)
+            {
+                TContent completeDocument;
+                if (contentRepository.TryGet(document.ContentLink, language, out completeDocument))
+                {
+                    completeDocuments.Add(completeDocument);
+                }
+            }
+            result.Response.Documents = completeDocuments;
+            return result;
         }
 
         public async Task Remove(ContentReference contentReference)
