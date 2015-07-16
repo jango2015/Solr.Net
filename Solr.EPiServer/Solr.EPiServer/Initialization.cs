@@ -14,26 +14,34 @@ namespace Solr.EPiServer
         {
             var contentEvents = ServiceLocator.Current.GetInstance<IContentEvents>();
             contentEvents.PublishedContent += ContentEventsOnPublishedContent;
-            contentEvents.RejectedContent += ContentEventsOnRejectedContent;
+            contentEvents.MovedContent += ContentEventsOnMovedContent;
+        }
+
+        private static async void ContentEventsOnMovedContent(object sender, ContentEventArgs contentEventArgs)
+        {
+            var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
+            if (contentEventArgs.TargetLink == ContentReference.WasteBasket)
+            {
+                // remove
+                await solrContentRepository.Remove(contentEventArgs.ContentLink);
+            }
+            else
+            {
+                // update index at new url
+                await solrContentRepository.Add(contentEventArgs.ContentLink, contentEventArgs.Content);
+            }
         }
 
         private static async void ContentEventsOnPublishedContent(object sender, ContentEventArgs contentEventArgs)
         {
             var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
-            await solrContentRepository.Add(contentEventArgs.ContentLink);
-        }
-
-        private static async void ContentEventsOnRejectedContent(object sender, ContentEventArgs contentEventArgs)
-        {
-            var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
-            await solrContentRepository.Remove(contentEventArgs.ContentLink);
+            await solrContentRepository.Add(contentEventArgs.ContentLink, contentEventArgs.Content);
         }
 
         public void Uninitialize(InitializationEngine context)
         {
             var contentEvents = ServiceLocator.Current.GetInstance<IContentEvents>();
             contentEvents.PublishedContent -= ContentEventsOnPublishedContent;
-            contentEvents.RejectedContent -= ContentEventsOnRejectedContent;
         }
     }
 }

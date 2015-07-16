@@ -58,6 +58,7 @@
     <Compile Include="ISolrConfiguration.cs" />
     <Compile Include="ISolrRepository.cs" />
     <Compile Include="Serialization\ISolrFieldResolver.cs" />
+    <Compile Include="Serialization\SolrDateTimeConverter.cs" />
     <Compile Include="Serialization\SolrExpressionTranslator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DefaultSolrRepository.cs" />

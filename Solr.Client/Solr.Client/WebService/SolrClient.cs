@@ -37,7 +37,12 @@ namespace Solr.Client.WebService
             };
             var settings = new JsonSerializerSettings
             {
-                Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_fieldResolver) }
+                Converters =
+                    new List<JsonConverter>
+                    {
+                        new SolrDateTimeConverter(),
+                        new SolrJsonConverter<TDocument>(_fieldResolver)
+                    }
             };
             await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request, settings);
         }
@@ -81,7 +86,11 @@ namespace Solr.Client.WebService
             };
             var settings = new JsonSerializerSettings
             {
-                Converters = new List<JsonConverter> { new SolrJsonConverter<TDocument>(_fieldResolver) }
+                Converters = new List<JsonConverter>
+                {
+                    new SolrDateTimeConverter(),
+                    new SolrJsonConverter<TDocument>(_fieldResolver)
+                }
             };
             return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TDocument>>(_configuration.QueryUrl, request, settings);
         }

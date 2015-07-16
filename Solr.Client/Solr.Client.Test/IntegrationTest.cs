@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,7 +46,8 @@ namespace Solr.Client.Test
             await _repository.Add(new TestDocument1
             {
                 Id = "test1",
-                Title = "UnitTest2"
+                Title = "UnitTest2",
+                CreatedAt = DateTime.Now
             });
             // verify
             var r2 = await _repository.Get<TestDocument1>("id:test1").Execute();
@@ -90,6 +92,7 @@ namespace Solr.Client.Test
         {
             public string Id { get; set; }
             public string Title { get; set; }
+            public DateTime CreatedAt { get; set; }
         }
 
         public class TestDocument2 : TestDocument1
@@ -107,9 +110,13 @@ namespace Solr.Client.Test
                 return "id";
             }
             var memberType = GetMemberType(memberInfo);
-            if (memberType == typeof (string))
+            if (memberType == typeof(string))
             {
                 return string.Format("{0}_txt_da", memberInfo.Name);
+            }
+            else if (memberType == typeof(DateTime))
+            {
+                return string.Format("{0}_dt", memberInfo.Name);
             }
             return memberInfo.Name.ToLowerInvariant();
         }
