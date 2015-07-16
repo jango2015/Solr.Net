@@ -74,7 +74,7 @@ namespace Solr.Client.WebService
             return responseObject;
         }
 
-        public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query) where TDocument : new()
+        public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query)
         {
             var translator = new SolrExpressionTranslator(_fieldResolver);
             var request = new SolrQueryRequest

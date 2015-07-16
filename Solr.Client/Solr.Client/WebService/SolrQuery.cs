@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 
 namespace Solr.Client.WebService
 {
-    public class SolrQuery<TDocument> where TDocument : new()
+    public class SolrQuery<TDocument>
     {
         public readonly string Query;
         public string QueryType;

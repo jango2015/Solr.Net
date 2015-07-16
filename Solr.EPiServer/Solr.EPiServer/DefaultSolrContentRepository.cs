@@ -107,7 +107,7 @@ namespace Solr.EPiServer
                 : content.Property.LanguageBranch;
         }
 
-        public async Task<SolrQueryResponse<TContent>> Query<TContent>(SolrQuery<TContent> query, CultureInfo language = null) where TContent : IContent, new()
+        public async Task<SolrQueryResponse<TContent>> Query<TContent>(SolrQuery<TContent> query, CultureInfo language = null) where TContent : IContent
         {
             var fieldResolver = new EpiSolrFieldResolver(language ?? LanguageSelector.AutoDetect(false).Language);
             var queryRepository = new DefaultSolrRepository(_solrConfiguration, fieldResolver);
