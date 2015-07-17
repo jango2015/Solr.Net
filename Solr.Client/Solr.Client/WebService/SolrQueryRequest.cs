@@ -13,5 +13,7 @@ namespace Solr.Client.WebService
         public int Offset { get; set; }
         [JsonProperty(PropertyName = "limit")]
         public int Limit { get; set; }
+        [JsonProperty(PropertyName = "facet")]
+        public Dictionary<string, object> Facet { get; set; }
     }
 }

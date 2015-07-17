@@ -13,6 +13,7 @@ namespace Solr.Client.WebService
         internal int Offset = 0;
         internal readonly List<Expression<Func<TDocument, object>>> Filters = new List<Expression<Func<TDocument, object>>>();
         internal readonly List<Expression<Func<TDocument, object>>> QueryFields = new List<Expression<Func<TDocument, object>>>();
+        internal readonly Dictionary<string, ISolrQueryFacet> Facets = new Dictionary<string, ISolrQueryFacet>();
 
         public SolrQuery(string query, string queryType = "dismax")
         {
@@ -58,6 +59,12 @@ namespace Solr.Client.WebService
         public SolrQuery<TDocument> QueryField(Expression<Func<TDocument, object>> expression)
         {
             QueryFields.Add(expression);
+            return this;
+        }
+
+        public SolrQuery<TDocument> Facet(string name, ISolrQueryFacet facet)
+        {
+            Facets.Add(name, facet);
             return this;
         }
     }

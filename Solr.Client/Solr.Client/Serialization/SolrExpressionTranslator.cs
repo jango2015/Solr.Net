@@ -5,14 +5,14 @@ using System.Text;
 
 namespace Solr.Client.Serialization
 {
-    class SolrExpressionTranslator : ExpressionVisitor
+    public class SolrExpressionTranslator : ExpressionVisitor
     {
-        private readonly ISolrFieldResolver _fieldResolver;
+        public readonly ISolrFieldResolver FieldResolver;
         private StringBuilder _query;
 
         public SolrExpressionTranslator(ISolrFieldResolver fieldResolver)
         {
-            _fieldResolver = fieldResolver;
+            FieldResolver = fieldResolver;
         }
 
         public string Translate(Expression expression)
@@ -130,7 +130,7 @@ namespace Solr.Client.Serialization
             }
             if (node.Expression.NodeType == ExpressionType.Parameter)
             {
-                _query.Append(_fieldResolver.GetFieldName(node.Member));
+                _query.Append(FieldResolver.GetFieldName(node.Member));
                 return node;
             }
             if (node.Expression.NodeType == ExpressionType.Constant)

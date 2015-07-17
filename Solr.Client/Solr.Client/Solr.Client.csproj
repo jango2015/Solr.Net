@@ -69,6 +69,7 @@
     <Compile Include="DefaultSolrRepository.cs" />
     <Compile Include="Serialization\DefaultSolrFieldResolver.cs" />
     <Compile Include="Serialization\SolrLiteral.cs" />
+    <Compile Include="WebService\ISolrQueryFacet.cs" />
     <Compile Include="WebService\SolrAddRequest.cs" />
     <Compile Include="WebService\SolrClient.cs" />
     <Compile Include="Serialization\SolrContractResolver.cs" />

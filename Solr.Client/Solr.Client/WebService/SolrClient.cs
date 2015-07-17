@@ -91,7 +91,8 @@ namespace Solr.Client.WebService
                 Query = translator.Translate(query.Query),
                 Offset = query.Offset,
                 Limit = query.Limit,
-                Filters = query.Filters.Select(translator.Translate)
+                Filters = query.Filters.Select(translator.Translate),
+                Facet = query.Facets.ToDictionary(x => x.Key, y => y.Value.Translate(translator))
             };
             // set get data
             var url = new UriBuilder(_configuration.QueryUrl);
