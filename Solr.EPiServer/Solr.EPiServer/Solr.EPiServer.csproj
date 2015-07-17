@@ -127,13 +127,14 @@
     </Reference>
     <Reference Include="Solr.Client, Version=1.1.5675.36832, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Solr.Client.1.1.5675.36832\lib\net45\Solr.Client.dll</HintPath>
+      <HintPath>..\..\Solr.Client\Solr.Client\bin\Debug\Solr.Client.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.6.4.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <Private>True</Private>
       <HintPath>..\packages\structuremap.2.6.4.1\lib\net40\StructureMap.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Net.Http">
       <Private>True</Private>
@@ -178,7 +179,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DefaultSolrConfiguration.cs" />
+    <Compile Include="EpiSolrConfiguration.cs" />
     <Compile Include="EpiSolrFieldResolver.cs" />
     <Compile Include="DefaultSolrContentRepository.cs" />
     <Compile Include="Helpers\HtmlAgilityPackHelper.cs" />

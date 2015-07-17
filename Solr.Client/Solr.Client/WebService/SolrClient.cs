@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
+using log4net;
 using Newtonsoft.Json;
 using Solr.Client.Serialization;
 
@@ -14,12 +15,14 @@ namespace Solr.Client.WebService
         private readonly ISolrConfiguration _configuration;
         private readonly ISolrFieldResolver _fieldResolver;
         private readonly HttpClient _httpClient;
+        private ILog _logger;
 
         public SolrClient(ISolrConfiguration configuration, ISolrFieldResolver fieldResolver)
         {
             _configuration = configuration;
             _fieldResolver = fieldResolver;
             _httpClient = new HttpClient();
+            _logger = LogManager.GetLogger(GetType());
         }
 
         public async Task Commit()
@@ -52,12 +55,12 @@ namespace Solr.Client.WebService
             where TResponse : SolrResponse
         {
             var requestString = JsonConvert.SerializeObject(request, settings);
-            Console.WriteLine("< {0}", requestString);
+            _logger.Debug(string.Format("Requesting '{0}' with post data: {1}", url, requestString));
             var content = new StringContent(requestString);
             content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
             var response = await _httpClient.PostAsync(url, content);
             var responseString = await response.Content.ReadAsStringAsync();
-            Console.WriteLine("> {0}", responseString);
+            _logger.Debug(string.Format("Received response: {0}", responseString));
             if (!response.IsSuccessStatusCode)
             {
                 throw new HttpRequestException(string.Format("Request failed with statuscode {0} {1}: {2}",
@@ -82,13 +85,24 @@ namespace Solr.Client.WebService
         public async Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQuery<TDocument> query)
         {
             var translator = new SolrExpressionTranslator(_fieldResolver);
-            var request = new SolrQueryRequest
+            // set post data
+            var postRequest = new SolrQueryRequest
             {
-                Query = query.Query,
+                Query = translator.Translate(query.Query),
                 Offset = query.Offset,
                 Limit = query.Limit,
                 Filters = query.Filters.Select(translator.Translate)
             };
+            // set get data
+            var url = new UriBuilder(_configuration.QueryUrl);
+            var getRequest = url.Uri.ParseQueryString();
+            getRequest.Add("defType", query.QueryType);
+            if (query.QueryFields.Any())
+            {
+                getRequest.Add("qf", string.Join(" ", query.QueryFields.Select(translator.Translate)));
+            }
+            url.Query = getRequest.ToString();
+            // post
             var settings = new JsonSerializerSettings
             {
                 Converters = new List<JsonConverter>
@@ -97,7 +111,7 @@ namespace Solr.Client.WebService
                     new SolrJsonConverter<TResult>(_fieldResolver)
                 }
             };
-            return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TResult>>(_configuration.QueryUrl, request, settings);
+            return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TResult>>(url.ToString(), postRequest, settings);
         }
 
         public async Task Remove(object id, bool commit = true)

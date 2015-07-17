@@ -3,6 +3,7 @@ using EPiServer.Core;
 using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
 using EPiServer.ServiceLocation;
+using EPiServer.Web;
 
 namespace Solr.EPiServer
 {
@@ -14,13 +15,13 @@ namespace Solr.EPiServer
         {
             var contentEvents = ServiceLocator.Current.GetInstance<IContentEvents>();
             contentEvents.PublishedContent += ContentEventsOnPublishedContent;
-            contentEvents.MovedContent += ContentEventsOnMovedContent;
+            contentEvents.MovedContent += ContentEventsOnPublishedContent;
         }
-
-        private static async void ContentEventsOnMovedContent(object sender, ContentEventArgs contentEventArgs)
+        
+        private static async void ContentEventsOnPublishedContent(object sender, ContentEventArgs contentEventArgs)
         {
             var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
-            if (contentEventArgs.TargetLink == ContentReference.WasteBasket)
+            if (ContentIsInvalid(contentEventArgs))
             {
                 // remove
                 await solrContentRepository.Remove(contentEventArgs.ContentLink);
@@ -28,20 +29,23 @@ namespace Solr.EPiServer
             else
             {
                 // update index at new url
-                await solrContentRepository.Add(contentEventArgs.ContentLink, contentEventArgs.Content);
+                await solrContentRepository.Add(SiteDefinition.Current.Id, contentEventArgs.ContentLink, contentEventArgs.Content);
             }
         }
 
-        private static async void ContentEventsOnPublishedContent(object sender, ContentEventArgs contentEventArgs)
+        private static bool ContentIsInvalid(ContentEventArgs contentEventArgs)
         {
-            var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
-            await solrContentRepository.Add(contentEventArgs.ContentLink, contentEventArgs.Content);
+            // ignore root page, if it is not the start page
+            if (contentEventArgs.ContentLink.Equals(ContentReference.RootPage, true) && !ContentReference.RootPage.Equals(ContentReference.StartPage, true)) return true;
+            // ignore items in the waste basket
+            return contentEventArgs.TargetLink == ContentReference.WasteBasket;
         }
 
         public void Uninitialize(InitializationEngine context)
         {
             var contentEvents = ServiceLocator.Current.GetInstance<IContentEvents>();
             contentEvents.PublishedContent -= ContentEventsOnPublishedContent;
+            contentEvents.MovedContent -= ContentEventsOnPublishedContent;
         }
     }
 }

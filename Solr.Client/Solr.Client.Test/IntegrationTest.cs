@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using log4net.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Solr.Client.Serialization;
 using Solr.Client.WebService;
@@ -15,6 +16,9 @@ namespace Solr.Client.Test
 
         public IntegrationTest()
         {
+            // load log4net
+            BasicConfigurator.Configure();
+            // load solr
             var configuration = new DefaultSolrConfiguration("http://localhost:8983/solr/test");
             _repository = new DefaultSolrRepository(configuration, new CustomSolrFieldResolver());
         }
@@ -41,7 +45,7 @@ namespace Solr.Client.Test
             // ensure deleted
             await _repository.Remove("test1");
             // verify
-            var r1 = await _repository.Get(new SolrQuery<TestDocument1>("id:test1"));
+            var r1 = await _repository.Get(new SolrQuery<TestDocument1>(x => x.Id == "test1"));
             Assert.AreEqual(0, r1.Response.Documents.Count());
             // add
             await _repository.Add(new TestDocument1
@@ -51,12 +55,12 @@ namespace Solr.Client.Test
                 CreatedAt = DateTime.Now
             });
             // verify
-            var r2 = await _repository.Get(new SolrQuery<TestDocument1>("id:test1"));
+            var r2 = await _repository.Get(new SolrQuery<TestDocument1>(x => x.Id == "test1"));
             Assert.AreEqual(1, r2.Response.Documents.Count());
             // delete
             await _repository.Remove("test1");
             // verify
-            var r3 = await _repository.Get(new SolrQuery<TestDocument1>("id:test1"));
+            var r3 = await _repository.Get(new SolrQuery<TestDocument1>(x => x.Id == "test1"));
             Assert.AreEqual(0, r3.Response.Documents.Count());
         }
 
@@ -67,7 +71,7 @@ namespace Solr.Client.Test
             Assert.AreEqual(1, r1.Response.Documents.Count());
             var r2 = await _repository.Get(new SolrQuery<TestDocument1>("Hest"));
             Assert.AreEqual(0, r2.Response.Documents.Count());
-            var r3 = await _repository.Get(new SolrQuery<TestDocument1>("*").Filter(x => x.Title.Contains("UnitTest1")));
+            var r3 = await _repository.Get(new SolrQuery<TestDocument1>("*", "lucene").Filter(x => x.Title.Contains("UnitTest1")));
             Assert.AreEqual(1, r3.Response.Documents.Count());
         }
 
