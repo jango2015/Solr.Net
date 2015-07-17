@@ -125,9 +125,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Solr.Client, Version=1.1.5675.36832, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Solr.Client, Version=1.1.5676.24241, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Solr.Client\Solr.Client\bin\Debug\Solr.Client.dll</HintPath>
+      <HintPath>..\packages\Solr.Client.1.1.5676.24241\lib\net45\Solr.Client.dll</HintPath>
     </Reference>
     <Reference Include="StructureMap, Version=2.6.4.0, Culture=neutral, PublicKeyToken=e60ad81abae3c223, processorArchitecture=MSIL">
       <Private>True</Private>
