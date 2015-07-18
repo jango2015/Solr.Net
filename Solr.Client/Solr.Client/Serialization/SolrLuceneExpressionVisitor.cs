@@ -5,12 +5,12 @@ using System.Text;
 
 namespace Solr.Client.Serialization
 {
-    public class SolrExpressionTranslator : ExpressionVisitor
+    public class SolrLuceneExpressionVisitor : ExpressionVisitor
     {
         public readonly ISolrFieldResolver FieldResolver;
         private StringBuilder _query;
 
-        public SolrExpressionTranslator(ISolrFieldResolver fieldResolver)
+        public SolrLuceneExpressionVisitor(ISolrFieldResolver fieldResolver)
         {
             FieldResolver = fieldResolver;
         }

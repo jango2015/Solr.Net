@@ -9,7 +9,7 @@ namespace Solr.Client.WebService
 {
     public interface ISolrQueryFacet
     {
-        object Translate(SolrExpressionTranslator translator);
+        object Translate(SolrLuceneExpressionVisitor translator);
     }
 
     public class SolrQueryStatisticsFacet<TDocument> : ISolrQueryFacet
@@ -26,7 +26,7 @@ namespace Solr.Client.WebService
             _expression = expression;
         }
 
-        public object Translate(SolrExpressionTranslator translator)
+        public object Translate(SolrLuceneExpressionVisitor translator)
         {
             return translator.Translate(_expression);
         }
@@ -35,7 +35,7 @@ namespace Solr.Client.WebService
     public abstract class SolrQueryFacet : ISolrQueryFacet
     {
         private readonly Dictionary<string, ISolrQueryFacet> _facets = new Dictionary<string, ISolrQueryFacet>();
-        protected SolrExpressionTranslator Translator;
+        protected SolrLuceneExpressionVisitor Translator;
 
         [JsonProperty(PropertyName = "facet", NullValueHandling = NullValueHandling.Ignore)]
         internal IDictionary<string, object> Facets
@@ -53,7 +53,7 @@ namespace Solr.Client.WebService
             return this;
         }
 
-        public object Translate(SolrExpressionTranslator translator)
+        public object Translate(SolrLuceneExpressionVisitor translator)
         {
             Translator = translator;
             return this;

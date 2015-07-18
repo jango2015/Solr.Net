@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using log4net;
 using Newtonsoft.Json;
+using Solr.Client.Linq;
 using Solr.Client.Serialization;
 
 namespace Solr.Client.WebService
@@ -15,7 +16,7 @@ namespace Solr.Client.WebService
         private readonly ISolrConfiguration _configuration;
         private readonly ISolrFieldResolver _fieldResolver;
         private readonly HttpClient _httpClient;
-        private ILog _logger;
+        private readonly ILog _logger;
 
         public SolrClient(ISolrConfiguration configuration, ISolrFieldResolver fieldResolver)
         {
@@ -28,7 +29,7 @@ namespace Solr.Client.WebService
         public async Task Commit()
         {
             var request = new SolrUpdateRequest {Commit = new object()};
-            await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request);
+            await PostAsync<SolrResponse>(_configuration.UpdateUrl, request);
         }
 
         public async Task Add<TDocument>(TDocument document, bool commit = true)
@@ -38,33 +39,58 @@ namespace Solr.Client.WebService
                 Add = new SolrAddRequest(document),
                 Commit = commit ? new object() : null
             };
-            var settings = new JsonSerializerSettings
-            {
-                Converters =
-                    new List<JsonConverter>
-                    {
-                        new SolrDateTimeConverter(),
-                        new SolrJsonConverter<TDocument>(_fieldResolver)
-                    }
-            };
-            await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request, settings);
+            var settings = GetSettings<TDocument>();
+            await PostAsync<SolrResponse>(_configuration.UpdateUrl, request, settings);
         }
 
-        private async Task<TResponse> PostAsJsonAsync<TRequest, TResponse>(string url, TRequest request,
+        public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQueryRequest query)
+        {
+            return await Get<TDocument, TDocument>(query);
+        }
+
+        public async Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQueryRequest request)
+        {
+            var settings = GetSettings<TDocument>();
+            var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("json", JsonConvert.SerializeObject(request.Json, settings)),
+                new KeyValuePair<string, string>("deftype", request.QueryType)
+            });
+            // post
+            return await PostAsync<SolrQueryResponse<TResult>>(_configuration.QueryUrl, content, settings);
+        }
+
+        public async Task Remove(object id, bool commit = true)
+        {
+            var request = new SolrUpdateRequest
+            {
+                Remove = new SolrDeleteRequest(id),
+                Commit = commit ? new object() : null
+            };
+            await PostAsync<SolrResponse>(_configuration.UpdateUrl, request);
+        }
+
+        private async Task<TResponse> PostAsync<TResponse>(string url, object request,
             JsonSerializerSettings settings = null)
             where TResponse : SolrResponse
         {
-            var requestString = JsonConvert.SerializeObject(request, settings);
-            _logger.Debug(string.Format("Requesting '{0}' with post data: {1}", url, requestString));
-            var content = new StringContent(requestString);
+            var content = new StringContent(JsonConvert.SerializeObject(request, settings));
             content.Headers.ContentType = new MediaTypeWithQualityHeaderValue("application/json");
+            return await PostAsync<TResponse>(url, content, settings);
+        }
+
+        private async Task<TResponse> PostAsync<TResponse>(string url, HttpContent content,
+            JsonSerializerSettings settings = null)
+            where TResponse : SolrResponse
+        {
+            _logger.Debug(string.Format("Requesting '{0}' with post data: {1}", url, content));
             var response = await _httpClient.PostAsync(url, content);
             var responseString = await response.Content.ReadAsStringAsync();
             _logger.Debug(string.Format("Received response: {0}", responseString));
             if (!response.IsSuccessStatusCode)
             {
                 throw new HttpRequestException(string.Format("Request failed with statuscode {0} {1}: {2}",
-                    (int) response.StatusCode, response.ReasonPhrase, responseString));
+                    (int)response.StatusCode, response.ReasonPhrase, responseString));
             }
             var responseObject = JsonConvert.DeserializeObject<TResponse>(responseString, settings);
             if (!responseObject.IsSuccessStatusCode)
@@ -77,52 +103,18 @@ namespace Solr.Client.WebService
             return responseObject;
         }
 
-        public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query)
+        private JsonSerializerSettings GetSettings<TDocument>()
         {
-            return await Get<TDocument, TDocument>(query);
-        }
-
-        public async Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQuery<TDocument> query)
-        {
-            var translator = new SolrExpressionTranslator(_fieldResolver);
-            // set post data
-            var postRequest = new SolrQueryRequest
+            return new JsonSerializerSettings
             {
-                Query = translator.Translate(query.Query),
-                Offset = query.Offset,
-                Limit = query.Limit,
-                Filters = query.Filters.Select(translator.Translate),
-                Facet = query.Facets.ToDictionary(x => x.Key, y => y.Value.Translate(translator))
+                Converters =
+                    new List<JsonConverter>
+                    {
+                        new SolrDateTimeConverter(),
+                        new SolrJsonConverter<TDocument>(_fieldResolver)
+                    },
+                NullValueHandling = NullValueHandling.Ignore
             };
-            // set get data
-            var url = new UriBuilder(_configuration.QueryUrl);
-            var getRequest = url.Uri.ParseQueryString();
-            getRequest.Add("defType", query.QueryType);
-            if (query.QueryFields.Any())
-            {
-                getRequest.Add("qf", string.Join(" ", query.QueryFields.Select(translator.Translate)));
-            }
-            url.Query = getRequest.ToString();
-            // post
-            var settings = new JsonSerializerSettings
-            {
-                Converters = new List<JsonConverter>
-                {
-                    new SolrDateTimeConverter(),
-                    new SolrJsonConverter<TResult>(_fieldResolver)
-                }
-            };
-            return await PostAsJsonAsync<SolrQueryRequest, SolrQueryResponse<TResult>>(url.ToString(), postRequest, settings);
-        }
-
-        public async Task Remove(object id, bool commit = true)
-        {
-            var request = new SolrUpdateRequest
-            {
-                Remove = new SolrDeleteRequest(id),
-                Commit = commit ? new object() : null
-            };
-            await PostAsJsonAsync<SolrUpdateRequest, SolrResponse>(_configuration.UpdateUrl, request);
         }
 
         public void Dispose()

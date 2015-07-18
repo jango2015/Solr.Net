@@ -14,7 +14,11 @@ namespace Solr.Client.Serialization
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var mappingSerializer = new JsonSerializer { ContractResolver = new SolrContractResolver(_fieldResolver) };
+            var mappingSerializer = new JsonSerializer
+            {
+                ContractResolver = new SolrContractResolver(_fieldResolver),
+                NullValueHandling = NullValueHandling.Ignore
+            };
             mappingSerializer.Converters.Add(new SolrDateTimeConverter());
             mappingSerializer.Serialize(writer, value);
         }

@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Solr.Client.Linq;
 using Solr.Client.Serialization;
 using Solr.Client.WebService;
 
@@ -7,12 +9,11 @@ namespace Solr.Client
     public class DefaultSolrRepository : ISolrRepository
     {
         private readonly ISolrConfiguration _configruation;
-        private readonly ISolrFieldResolver _fieldResolver;
 
         public DefaultSolrRepository(ISolrConfiguration configruation, ISolrFieldResolver fieldResolver = null)
         {
             _configruation = configruation;
-            _fieldResolver = fieldResolver ?? new DefaultSolrFieldResolver();
+            FieldResolver = fieldResolver ?? new DefaultSolrFieldResolver();
         }
 
         public virtual async Task Add<TDocument>(TDocument document)
@@ -20,21 +21,16 @@ namespace Solr.Client
             await Client.Add(document);
         }
 
-        public virtual async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query)
+        public virtual IQueryable<TDocument> Search<TDocument>()
         {
-            return await Get<TDocument, TDocument>(query);
+            return new SolrQuery<TDocument>(this);
         }
 
-        public virtual async Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQuery<TDocument> query)
-        {
-            return await Client.Get<TDocument, TResult>(query);
-        }
-
-        private SolrClient Client
+        public SolrClient Client
         {
             get
             {
-                return new SolrClient(_configruation, _fieldResolver);
+                return new SolrClient(_configruation, FieldResolver);
             }
         }
 
@@ -42,5 +38,7 @@ namespace Solr.Client
         {
             await Client.Remove(id);
         }
+
+        public ISolrFieldResolver FieldResolver { get; private set; }
     }
 }

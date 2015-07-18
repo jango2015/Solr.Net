@@ -62,9 +62,11 @@
     <Compile Include="DefaultSolrConfiguration.cs" />
     <Compile Include="ISolrConfiguration.cs" />
     <Compile Include="ISolrRepository.cs" />
+    <Compile Include="Linq\SolrQueryExtensions.cs" />
     <Compile Include="Serialization\ISolrFieldResolver.cs" />
     <Compile Include="Serialization\SolrDateTimeConverter.cs" />
-    <Compile Include="Serialization\SolrExpressionTranslator.cs" />
+    <Compile Include="Serialization\SolrExpressionVisitor.cs" />
+    <Compile Include="Serialization\SolrLuceneExpressionVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="DefaultSolrRepository.cs" />
     <Compile Include="Serialization\DefaultSolrFieldResolver.cs" />
@@ -75,7 +77,8 @@
     <Compile Include="Serialization\SolrContractResolver.cs" />
     <Compile Include="Serialization\SolrJsonConverter.cs" />
     <Compile Include="WebService\SolrDeleteRequest.cs" />
-    <Compile Include="WebService\SolrQuery.cs" />
+    <Compile Include="Linq\SolrQuery.cs" />
+    <Compile Include="Linq\SolrQueryProvider.cs" />
     <Compile Include="WebService\SolrQueryResponse.cs" />
     <Compile Include="WebService\SolrQueryRequest.cs" />
     <Compile Include="WebService\SolrUpdateRequest.cs" />

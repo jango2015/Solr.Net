@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Solr.Client.Serialization;
 using Solr.Client.WebService;
 
 namespace Solr.Client
@@ -6,8 +8,9 @@ namespace Solr.Client
     public interface ISolrRepository
     {
         Task Add<TDocument>(TDocument document);
-        Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQuery<TDocument> query);
-        Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQuery<TDocument> query);
+        IQueryable<TDocument> Search<TDocument>();
         Task Remove(object id);
+        SolrClient Client { get; }
+        ISolrFieldResolver FieldResolver { get; }
     }
 }
