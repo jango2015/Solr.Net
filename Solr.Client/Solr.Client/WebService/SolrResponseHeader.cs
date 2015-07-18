@@ -2,7 +2,7 @@
 {
     public class SolrResponseHeader
     {
-        public int QTime { get; set; }
-        public int Status { get; set; }
+        public long QTime { get; set; }
+        public long Status { get; set; }
     }
 }

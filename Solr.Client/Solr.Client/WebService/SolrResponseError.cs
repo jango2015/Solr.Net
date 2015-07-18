@@ -4,7 +4,7 @@ namespace Solr.Client.WebService
 {
     public class SolrResponseError
     {
-        public int Code { get; set; }
+        public long Code { get; set; }
         [JsonProperty(PropertyName = "Msg")]
         public string Message { get; set; }
         public string Trace { get; set; }

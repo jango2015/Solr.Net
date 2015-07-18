@@ -15,6 +15,12 @@ namespace Solr.Client.WebService
         internal readonly List<Expression<Func<TDocument, object>>> QueryFields = new List<Expression<Func<TDocument, object>>>();
         internal readonly Dictionary<string, ISolrQueryFacet> Facets = new Dictionary<string, ISolrQueryFacet>();
 
+        public SolrQuery()
+        {
+            Query = document => SolrLiteral.String("*");
+            QueryType = "lucene";
+        }
+
         public SolrQuery(string query, string queryType = "dismax")
         {
             Query = document => SolrLiteral.String(query);
