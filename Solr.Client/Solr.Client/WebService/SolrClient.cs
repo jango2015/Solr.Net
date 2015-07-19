@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using log4net;
 using Newtonsoft.Json;
-using Solr.Client.Linq;
 using Solr.Client.Serialization;
 
 namespace Solr.Client.WebService
@@ -14,14 +12,12 @@ namespace Solr.Client.WebService
     public class SolrClient : IDisposable
     {
         private readonly ISolrConfiguration _configuration;
-        private readonly ISolrFieldResolver _fieldResolver;
         private readonly HttpClient _httpClient;
         private readonly ILog _logger;
 
-        public SolrClient(ISolrConfiguration configuration, ISolrFieldResolver fieldResolver)
+        public SolrClient(ISolrConfiguration configuration)
         {
             _configuration = configuration;
-            _fieldResolver = fieldResolver;
             _httpClient = new HttpClient();
             _logger = LogManager.GetLogger(GetType());
         }
@@ -39,25 +35,20 @@ namespace Solr.Client.WebService
                 Add = new SolrAddRequest(document),
                 Commit = commit ? new object() : null
             };
-            var settings = GetSettings<TDocument>();
+            var settings = GetSettings();
             await PostAsync<SolrResponse>(_configuration.UpdateUrl, request, settings);
         }
 
-        public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQueryRequest query)
+        public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQueryRequest request)
         {
-            return await Get<TDocument, TDocument>(query);
-        }
-
-        public async Task<SolrQueryResponse<TResult>> Get<TDocument, TResult>(SolrQueryRequest request)
-        {
-            var settings = GetSettings<TDocument>();
+            var settings = GetSettings();
             var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("json", JsonConvert.SerializeObject(request.Json, settings)),
                 new KeyValuePair<string, string>("deftype", request.QueryType)
             });
             // post
-            return await PostAsync<SolrQueryResponse<TResult>>(_configuration.QueryUrl, content, settings);
+            return await PostAsync<SolrQueryResponse<TDocument>>(_configuration.QueryUrl, content);
         }
 
         public async Task Remove(object id, bool commit = true)
@@ -83,7 +74,7 @@ namespace Solr.Client.WebService
             JsonSerializerSettings settings = null)
             where TResponse : SolrResponse
         {
-            _logger.Debug(string.Format("Requesting '{0}' with post data: {1}", url, content));
+            _logger.Debug(string.Format("Requesting '{0}' with post data: {1}", url, await content.ReadAsStringAsync()));
             var response = await _httpClient.PostAsync(url, content);
             var responseString = await response.Content.ReadAsStringAsync();
             _logger.Debug(string.Format("Received response: {0}", responseString));
@@ -103,16 +94,11 @@ namespace Solr.Client.WebService
             return responseObject;
         }
 
-        private JsonSerializerSettings GetSettings<TDocument>()
+        private static JsonSerializerSettings GetSettings()
         {
             return new JsonSerializerSettings
             {
-                Converters =
-                    new List<JsonConverter>
-                    {
-                        new SolrDateTimeConverter(),
-                        new SolrJsonConverter<TDocument>(_fieldResolver)
-                    },
+                Converters = new List<JsonConverter> {new SolrDateTimeConverter()},
                 NullValueHandling = NullValueHandling.Ignore
             };
         }

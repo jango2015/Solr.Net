@@ -1,4 +1,4 @@
-﻿namespace Solr.Client.Serialization
+﻿namespace Solr.Client.Linq
 {
     public class SolrLiteral
     {

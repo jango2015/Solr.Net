@@ -11,8 +11,7 @@ using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
 using Solr.Client;
-using Solr.Client.Serialization;
-using Solr.Client.WebService;
+using Solr.Client.Linq;
 using Solr.EPiServer.Helpers;
 
 namespace Solr.EPiServer
@@ -103,7 +102,7 @@ namespace Solr.EPiServer
                     _logger.Log(Level.Error, string.Format("Failed to index language branch {0}", languageName), ex);
                 }
             }
-            var updateRepository = new DefaultSolrRepository(_solrConfiguration);
+            var updateRepository = new SolrRepository(_solrConfiguration);
             await updateRepository.Add(documentContent);
         }
 
@@ -120,18 +119,19 @@ namespace Solr.EPiServer
                 : content.Property.LanguageBranch;
         }
 
-        public async Task<EpiSolrSearchResult<TContent>> Query<TContent>(SolrQuery<TContent> query, CultureInfo language = null, Guid? siteDefinitionId = null) where TContent : IContent
+        public async Task<EpiSolrSearchResult<TContent>> Search<TContent>(IQueryable<TContent> query,
+            CultureInfo language = null, Guid? siteDefinitionId = null) where TContent : IContent
         {
             var fieldResolver = new EpiSolrFieldResolver(language ?? LanguageSelector.AutoDetect(false).Language);
-            var queryRepository = new DefaultSolrRepository(_solrConfiguration, fieldResolver);
+            var queryRepository = new SolrRepository(_solrConfiguration, fieldResolver);
             // add type condition
             var contentType = typeof (TContent).FullName;
             query.Filter(x => SolrLiteral.String(FieldNameType) == contentType);
             // add publishstatus condition
-            if (typeof(IVersionable).IsAssignableFrom(typeof(TContent)))
+            if (typeof (IVersionable).IsAssignableFrom(typeof (TContent)))
             {
-                var startName = fieldResolver.GetFieldName(FieldNameStartPublish, typeof(DateTime));
-                var endName = fieldResolver.GetFieldName(FieldNameStopPublish, typeof(DateTime));
+                var startName = fieldResolver.GetFieldName(FieldNameStartPublish, typeof (DateTime));
+                var endName = fieldResolver.GetFieldName(FieldNameStopPublish, typeof (DateTime));
                 // IMPORTANT: round to nearest order, in order to optimize cache!
                 // thus immediate expiration of content is done by setting expiration
                 // date to more than one hour ago
@@ -146,11 +146,11 @@ namespace Solr.EPiServer
             // do dismax queries in the default field
             query.QueryField(fieldResolver.GetDefaultFieldName());
             // get only content links from result
-            var solrResult = await queryRepository.Get<TContent, EpiSolrContentReference>(query);
+            var solrResult = await queryRepository.Search<TContent, EpiSolrContentReference>(query);
             // replace partial results with full results
             var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
             var completeDocuments = new List<TContent>();
-            foreach (var document in solrResult.Response.Documents)
+            foreach (var document in solrResult.Documents)
             {
                 ContentReference contentReference;
                 TContent completeDocument;
@@ -170,7 +170,7 @@ namespace Solr.EPiServer
 
         public async Task Remove(ContentReference contentReference)
         {
-            var updateRepository = new DefaultSolrRepository(_solrConfiguration);
+            var updateRepository = new SolrRepository(_solrConfiguration);
             await updateRepository.Remove(contentReference.ID);
         }
 

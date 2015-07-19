@@ -1,16 +1,16 @@
 ﻿using System;
 using System.Linq.Expressions;
-using Solr.Client.Linq;
+using Solr.Client.Serialization;
 using Solr.Client.WebService;
 
-namespace Solr.Client.Serialization
+namespace Solr.Client.Linq
 {
-    class SolrExpressionVisitor : ExpressionVisitor
+    class SolrQueryExpressionVisitor : ExpressionVisitor
     {
         private SolrQueryRequest _result;
         private readonly SolrLuceneExpressionVisitor _luceneExpressionVisitor;
 
-        public SolrExpressionVisitor(ISolrFieldResolver fieldResolver)
+        public SolrQueryExpressionVisitor(ISolrFieldResolver fieldResolver)
         {
             _luceneExpressionVisitor = new SolrLuceneExpressionVisitor(fieldResolver);
         }

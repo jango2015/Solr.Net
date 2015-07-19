@@ -18,5 +18,13 @@ namespace Solr.Client.Serialization
                 base.WriteJson(writer, dateTime.Value.ToUniversalTime(), serializer);
             else base.WriteJson(writer, value, serializer);
         }
+
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            var dateTime = reader.Value as DateTime?;
+            return dateTime.HasValue
+                ? dateTime.Value.ToLocalTime()
+                : base.ReadJson(reader, objectType, existingValue, serializer);
+        }
     }
 }

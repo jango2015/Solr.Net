@@ -61,21 +61,19 @@
   <ItemGroup>
     <Compile Include="DefaultSolrConfiguration.cs" />
     <Compile Include="ISolrConfiguration.cs" />
-    <Compile Include="ISolrRepository.cs" />
     <Compile Include="Linq\SolrQueryExtensions.cs" />
     <Compile Include="Serialization\ISolrFieldResolver.cs" />
     <Compile Include="Serialization\SolrDateTimeConverter.cs" />
-    <Compile Include="Serialization\SolrExpressionVisitor.cs" />
-    <Compile Include="Serialization\SolrLuceneExpressionVisitor.cs" />
+    <Compile Include="Linq\SolrQueryExpressionVisitor.cs" />
+    <Compile Include="Linq\SolrLuceneExpressionVisitor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="DefaultSolrRepository.cs" />
+    <Compile Include="SolrRepository.cs" />
     <Compile Include="Serialization\DefaultSolrFieldResolver.cs" />
-    <Compile Include="Serialization\SolrLiteral.cs" />
+    <Compile Include="Linq\SolrLiteral.cs" />
     <Compile Include="WebService\ISolrQueryFacet.cs" />
     <Compile Include="WebService\SolrAddRequest.cs" />
     <Compile Include="WebService\SolrClient.cs" />
     <Compile Include="Serialization\SolrContractResolver.cs" />
-    <Compile Include="Serialization\SolrJsonConverter.cs" />
     <Compile Include="WebService\SolrDeleteRequest.cs" />
     <Compile Include="Linq\SolrQuery.cs" />
     <Compile Include="Linq\SolrQueryProvider.cs" />

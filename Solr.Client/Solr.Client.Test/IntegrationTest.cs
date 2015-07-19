@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using log4net.Config;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -9,7 +10,7 @@ namespace Solr.Client.Test
     [TestClass]
     public class IntegrationTest
     {
-        private readonly DefaultSolrRepository _repository;
+        private readonly SolrRepository _repository;
 
         public IntegrationTest()
         {
@@ -17,7 +18,7 @@ namespace Solr.Client.Test
             BasicConfigurator.Configure();
             // load solr
             var configuration = new DefaultSolrConfiguration("http://localhost:8983/solr/techproducts");
-            _repository = new DefaultSolrRepository(configuration, new TechProductFieldResolver());
+            _repository = new SolrRepository(configuration, new TechProductFieldResolver());
         }
         
         [TestMethod]
@@ -26,29 +27,35 @@ namespace Solr.Client.Test
             // ensure deleted
             await _repository.Remove("test1");
             // verify
-            var r1 = _repository.Search<TechProduct>().For(x => x.Id == "test1").ToList();
-            Assert.AreEqual(0, r1.Count());
+            var r1 = await _repository.Search(new SolrQuery<TechProduct>().For(x => x.Id == "test1"));
+            Assert.AreEqual(0, r1.NumFound);
             // add
+            var lastModified = DateTime.Now.AddDays(-1);
             await _repository.Add(new TechProduct
             {
                 Id = "test1",
-                Title = new[]{"UnitTest2"}
+                Title = new[]{"UnitTest2"},
+                LastModified = lastModified
             });
             // verify
-            var r2 = _repository.Search<TechProduct>().For(x => x.Id == "test1").ToList();
-            Assert.AreEqual(1, r2.Count());
+            var r2 = await _repository.Search(new SolrQuery<TechProduct>().For(x => x.Id == "test1"));
+            Assert.AreEqual(1, r2.NumFound);
+            var readLastModified = r2.Documents.First().LastModified;
+            Assert.IsNotNull(readLastModified);
+            // ignore fragments of a second with tostring
+            Assert.AreEqual(lastModified.ToString("R"), readLastModified.Value.ToString("R"));
             // delete
             await _repository.Remove("test1");
             // verify
-            var r3 = _repository.Search<TechProduct>().For(x => x.Id == "test1").Take(10).ToList();
-            Assert.AreEqual(0, r3.Count());
+            var r3 = await _repository.Search(new SolrQuery<TechProduct>().For(x => x.Id == "test1").Take(10));
+            Assert.AreEqual(0, r3.NumFound);
         }
 
         [TestMethod]
         public async Task Filter1()
         {
-            var r3 = _repository.Search<TechProduct>().For("*", "lucene").Filter(x => x.Title.Contains("volapyk"));
-            Assert.AreEqual(0, r3.ToList().Count());
+            var r3 = await _repository.Search(new SolrQuery<TechProduct>().For("*", "lucene").Filter(x => x.Title.Contains("volapyk")));
+            Assert.AreEqual(0, r3.NumFound);
         }
 
         [TestMethod]

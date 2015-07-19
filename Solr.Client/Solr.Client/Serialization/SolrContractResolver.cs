@@ -16,7 +16,10 @@ namespace Solr.Client.Serialization
         protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
         {
             var property = base.CreateProperty(member, memberSerialization);
-            property.PropertyName = _fieldResolver.GetFieldName(member);
+            if (_fieldResolver != null)
+            {
+                property.PropertyName = _fieldResolver.GetFieldName(member);
+            }
             return property;
         }
     }

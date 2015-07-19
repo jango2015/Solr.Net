@@ -2,8 +2,9 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
+using Solr.Client.Serialization;
 
-namespace Solr.Client.Serialization
+namespace Solr.Client.Linq
 {
     public class SolrLuceneExpressionVisitor : ExpressionVisitor
     {

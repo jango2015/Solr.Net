@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using Solr.Client.Serialization;
 
 namespace Solr.Client.Linq
 {
@@ -27,6 +26,19 @@ namespace Solr.Client.Linq
                     null,
                     ((MethodInfo)MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof(TDocument)),
                     new[] { @this.Expression, expression }));
+        }
+
+        public static IQueryable<TDocument> QueryField<TDocument>(this IQueryable<TDocument> @this, string field)
+        {
+            return @this.Provider.CreateQuery<TDocument>(
+                Expression.Call(
+                    null,
+                    ((MethodInfo) MethodBase.GetCurrentMethod()).MakeGenericMethod(typeof (TDocument)),
+                    new[]
+                    {
+                        @this.Expression,
+                        Expression.Call(typeof (SolrLiteral).GetMethod("String"), Expression.Constant(field))
+                    }));
         }
 
         public static IQueryable<TDocument> QueryField<TDocument>(this IQueryable<TDocument> @this, Expression<Func<TDocument, object>> expression)

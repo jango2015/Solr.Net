@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using Newtonsoft.Json;
+using Solr.Client.Linq;
 using Solr.Client.Serialization;
 
 namespace Solr.Client.WebService

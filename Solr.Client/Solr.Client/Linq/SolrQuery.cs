@@ -15,15 +15,15 @@ namespace Solr.Client.Linq
             Provider = provider;
         }
 
-        public SolrQuery(ISolrRepository solrRepository)
+        public SolrQuery()
         {
             Expression = Expression.Constant(this);
-            Provider = new SolrQueryProvider<TDocument>(solrRepository);
+            Provider = new SolrQueryProvider();
         }
 
         public IEnumerator<TDocument> GetEnumerator()
         {
-            return Provider.Execute<IEnumerable<TDocument>>(Expression).GetEnumerator();
+            throw new NotSupportedException();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
