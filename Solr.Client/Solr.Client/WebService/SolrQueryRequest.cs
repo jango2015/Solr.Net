@@ -18,7 +18,7 @@ namespace Solr.Client.WebService
         {
             private string _query = string.Empty;
             private readonly List<string> _filters = new List<string>();
-            private readonly Dictionary<string, object> _facet = new Dictionary<string, object>();
+            private readonly Dictionary<string, ISolrQueryFacet> _facets = new Dictionary<string, ISolrQueryFacet>();
 
             [JsonProperty(PropertyName = "query")]
             public string Query
@@ -39,9 +39,9 @@ namespace Solr.Client.WebService
             public int? Limit { get; set; }
 
             [JsonProperty(PropertyName = "facet")]
-            public Dictionary<string, object> Facet
+            public Dictionary<string, ISolrQueryFacet> Facets
             {
-                get { return _facet; }
+                get { return _facets; }
             }
         }
     }

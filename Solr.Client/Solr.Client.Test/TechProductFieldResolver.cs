@@ -17,6 +17,8 @@ namespace Solr.Client.Test
                     return "last_modified";
                 case "Source":
                     return "_src_";
+                case "ManufactureDate":
+                    return "manufacturedate_dt";
             }
             return memberInfo.Name.ToLowerInvariant();
         }

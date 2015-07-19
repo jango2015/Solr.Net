@@ -62,6 +62,7 @@
     <Compile Include="DefaultSolrConfiguration.cs" />
     <Compile Include="ISolrConfiguration.cs" />
     <Compile Include="Linq\SolrQueryExtensions.cs" />
+    <Compile Include="Linq\SolrRangeFacetQuery.cs" />
     <Compile Include="Serialization\ISolrFieldResolver.cs" />
     <Compile Include="Serialization\SolrDateTimeConverter.cs" />
     <Compile Include="Linq\SolrQueryExpressionVisitor.cs" />

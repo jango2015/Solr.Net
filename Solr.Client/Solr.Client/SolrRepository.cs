@@ -54,7 +54,8 @@ namespace Solr.Client
             {
                 Documents = response.Response.Documents.Select(x => x.ToObject<TResult>(resultSerializer)),
                 NumFound = response.Response.NumFound,
-                Start = response.Response.Start
+                Start = response.Response.Start,
+                Raw = response
             };
             return result;
         }
@@ -75,5 +76,6 @@ namespace Solr.Client
         public IEnumerable<TDocument> Documents { get; set; }
         public long NumFound { get; set; }
         public long Start { get; set; }
+        public SolrQueryResponse<JToken> Raw { get; set; }
     }
 }

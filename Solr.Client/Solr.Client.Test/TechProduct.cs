@@ -30,5 +30,6 @@ namespace Solr.Client.Test
         public string Source { get; set; }
         public IEnumerable<string> Content { get; set; }
         public string Payloads { get; set; }
+        public DateTime? ManufactureDate { get; set; }
     }
 }

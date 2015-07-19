@@ -8,7 +8,7 @@ namespace Solr.Client.WebService
     {
         public ResponseNode Response { get; set; }
         [JsonProperty(PropertyName = "facets")]
-        internal JToken Facets { get; set; }
+        public JToken Facets { get; set; }
 
         public class ResponseNode
         {

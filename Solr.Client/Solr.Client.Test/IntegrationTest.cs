@@ -61,6 +61,17 @@ namespace Solr.Client.Test
         [TestMethod]
         public async Task Facet1()
         {
+            var termsFacetFor = new SolrQuery<TechProduct>().For("*", "lucene").Take(0).TermsFacetFor(x => x.Category);
+            termsFacetFor = termsFacetFor.RangeFacetFor(x => x.Popularity, x => x.Range(5, 10, "1"));
+            termsFacetFor = termsFacetFor.RangeFacetFor(x => x.ManufactureDate,
+                x =>
+                    x.Range(DateTime.Now.AddYears(-20), DateTime.Now, "+1YEAR")
+                        .TermsFacetFor(y => y.Category,
+                            y => y.RangeFacetFor(z => z.Popularity, z => z.Range(5, 10, "1"))));
+            var searchResult = await _repository.Search(termsFacetFor);
+            var bucket = searchResult.Raw.Facets["R2"]["buckets"].ToList()[10]["T0"]["buckets"].ToList()[0]["R0"]["buckets"].ToList()[1];
+            Assert.AreEqual(6, bucket["val"]);
+            Assert.AreEqual(2, bucket["count"]);
             //var facetC = new SolrQueryStatisticsFacet<TechProduct>("unique(cat)");
             //var facetA = new SolrQueryTermsFacet<TechProduct>(x => x.Category).Facet("D", facetC);
             //var facetB = new SolrQueryTermsFacet<TechProduct>(x => x.LastModified).Facet("D", facetC);

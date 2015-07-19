@@ -6,7 +6,7 @@ using System.Linq.Expressions;
 
 namespace Solr.Client.Linq
 {
-    public class SolrQuery<TDocument> : IOrderedQueryable<TDocument>
+    public class SolrQuery<TDocument> : IOrderedQueryable<TDocument>, ISolrFacetQuery<TDocument>
     {
 
         public SolrQuery(Expression expression, IQueryProvider provider)

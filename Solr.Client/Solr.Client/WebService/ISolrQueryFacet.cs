@@ -1,115 +1,86 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
 using Newtonsoft.Json;
-using Solr.Client.Linq;
-using Solr.Client.Serialization;
 
 namespace Solr.Client.WebService
 {
     public interface ISolrQueryFacet
     {
-        object Translate(SolrLuceneExpressionVisitor translator);
-    }
-
-    public class SolrQueryStatisticsFacet<TDocument> : ISolrQueryFacet
-    {
-        private readonly Expression<Func<TDocument, object>> _expression;
-
-        public SolrQueryStatisticsFacet(string expression)
-        {
-            _expression = document => SolrLiteral.String(expression);
-        }
-
-        public SolrQueryStatisticsFacet(Expression<Func<TDocument, object>> expression)
-        {
-            _expression = expression;
-        }
-
-        public object Translate(SolrLuceneExpressionVisitor translator)
-        {
-            return translator.Translate(_expression);
-        }
     }
 
     public abstract class SolrQueryFacet : ISolrQueryFacet
     {
         private readonly Dictionary<string, ISolrQueryFacet> _facets = new Dictionary<string, ISolrQueryFacet>();
-        protected SolrLuceneExpressionVisitor Translator;
 
-        [JsonProperty(PropertyName = "facet", NullValueHandling = NullValueHandling.Ignore)]
-        internal IDictionary<string, object> Facets
+        [JsonProperty(PropertyName = "facet")]
+        public Dictionary<string, ISolrQueryFacet> Facets
         {
-            get
-            {
-                return _facets.ToDictionary(queryFacet => queryFacet.Key,
-                    queryFacet => queryFacet.Value.Translate(Translator));
-            }
-        }
-
-        public SolrQueryFacet Facet(string name, ISolrQueryFacet facet)
-        {
-            _facets.Add(name, facet);
-            return this;
-        }
-
-        public object Translate(SolrLuceneExpressionVisitor translator)
-        {
-            Translator = translator;
-            return this;
+            get { return _facets; }
         }
     }
 
-    public class SolrQueryTermsFacet<TDocument> : SolrQueryFacet
+    public class SolrQueryTermsFacet : SolrQueryFacet
     {
-        private readonly Expression<Func<TDocument, object>> _field;
-
         [JsonProperty(PropertyName = "type")]
-        internal static string Type
+        public string Type
         {
             get { return "terms"; }
         }
 
         [JsonProperty(PropertyName = "field")]
-        internal string Field
-        {
-            get { return Translator.Translate(_field); }
-        }
+        public string Field { get; set; }
 
-        [JsonProperty(PropertyName = "offset", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty(PropertyName = "offset")]
         public int? Offset { get; set; }
-        [JsonProperty(PropertyName = "limit", NullValueHandling = NullValueHandling.Ignore)]
+
+        [JsonProperty(PropertyName = "limit")]
         public int? Limit { get; set; }
-        [JsonProperty(PropertyName = "mincount", NullValueHandling = NullValueHandling.Ignore)]
+
+        [JsonProperty(PropertyName = "mincount")]
         public int? MinCount { get; set; }
-        [JsonProperty(PropertyName = "numBuckets", NullValueHandling = NullValueHandling.Ignore)]
+
+        [JsonProperty(PropertyName = "numBuckets")]
         public bool? NumBuckets { get; set; }
-        [JsonProperty(PropertyName = "allBuckets", NullValueHandling = NullValueHandling.Ignore)]
+
+        [JsonProperty(PropertyName = "allBuckets")]
         public bool? AllBuckets { get; set; }
-        [JsonProperty(PropertyName = "prefix", NullValueHandling = NullValueHandling.Ignore)]
+
+        [JsonProperty(PropertyName = "prefix")]
         public string Prefix { get; set; }
 
-        public SolrQueryTermsFacet(string field)
+
+    }
+
+    public class SolrQueryRangeFacet<TRange> : SolrQueryFacet
+    {
+        [JsonProperty(PropertyName = "type")]
+        public string Type
         {
-            _field = document => SolrLiteral.String(field);
+            get { return "range"; }
         }
 
-        public SolrQueryTermsFacet(Expression<Func<TDocument, object>> expression)
-        {
-            _field = expression;
-        }
+        [JsonProperty(PropertyName = "field")]
+        public string Field { get; set; }
 
-        public SolrQueryTermsFacet<TDocument> Skip(int n)
-        {
-            Offset = n;
-            return this;
-        }
+        [JsonProperty(PropertyName = "mincount")]
+        public int? MinCount { get; set; }
 
-        public SolrQueryTermsFacet<TDocument> Take(int n)
-        {
-            Limit = n;
-            return this;
-        }
+        [JsonProperty(PropertyName = "start")]
+        public TRange Start { get; set; }
+
+        [JsonProperty(PropertyName = "end")]
+        public TRange End { get; set; }
+
+        [JsonProperty(PropertyName = "gap")]
+        public string Gap { get; set; }
+
+        [JsonProperty(PropertyName = "hardend")]
+        public bool? Hardend { get; set; }
+
+        [JsonProperty(PropertyName = "other")]
+        public string Other { get; set; }
+
+        [JsonProperty(PropertyName = "include")]
+        public string Include { get; set; }
+
     }
 }
