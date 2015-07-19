@@ -126,7 +126,7 @@ namespace Solr.EPiServer
             var queryRepository = new SolrRepository(_solrConfiguration, fieldResolver);
             // add type condition
             var contentType = typeof (TContent).FullName;
-            query.Filter(x => SolrLiteral.String(FieldNameType) == contentType);
+            query = query.Filter(x => SolrLiteral.String(FieldNameType) == contentType);
             // add publishstatus condition
             if (typeof (IVersionable).IsAssignableFrom(typeof (TContent)))
             {
@@ -135,16 +135,16 @@ namespace Solr.EPiServer
                 // IMPORTANT: round to nearest order, in order to optimize cache!
                 // thus immediate expiration of content is done by setting expiration
                 // date to more than one hour ago
-                query.Filter(
+                query = query.Filter(
                     x =>
                         SolrLiteral.String(startName) == SolrLiteral.String("[* TO NOW/HOUR+1HOUR]") &&
                         SolrLiteral.String(endName) == SolrLiteral.String("[NOW/HOUR TO *]"));
             }
             // filter on site
             var siteId = siteDefinitionId.GetValueOrDefault(SiteDefinition.Current.Id).ToString("D");
-            query.Filter(x => SolrLiteral.String(FieldNameSite) == siteId);
+            query = query.Filter(x => SolrLiteral.String(FieldNameSite) == siteId);
             // do dismax queries in the default field
-            query.QueryField(fieldResolver.GetDefaultFieldName());
+            query = query.QueryField(fieldResolver.GetDefaultFieldName());
             // get only content links from result
             var solrResult = await queryRepository.Search<TContent, EpiSolrContentReference>(query, fieldResolver);
             // replace partial results with full results
