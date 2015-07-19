@@ -8,7 +8,7 @@ using Solr.Client.Linq;
 namespace Solr.Client.Test
 {
     [TestClass]
-    public class IntegrationTest
+    public class IntegrationTest : IDisposable
     {
         private readonly SolrRepository _repository;
 
@@ -74,5 +74,9 @@ namespace Solr.Client.Test
             //Assert.AreNotEqual(null, dic);
         }
 
+        public void Dispose()
+        {
+            _repository.Dispose();
+        }
     }
 }

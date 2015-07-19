@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -9,15 +10,15 @@ using Solr.Client.WebService;
 
 namespace Solr.Client
 {
-    public class SolrRepository
+    public class SolrRepository : IDisposable
     {
-        private readonly ISolrConfiguration _configruation;
         private readonly ISolrFieldResolver _fieldResolver;
         private readonly JsonSerializer _serializer;
+        private readonly SolrClient _client;
 
         public SolrRepository(ISolrConfiguration configruation, ISolrFieldResolver fieldResolver = null)
         {
-            _configruation = configruation;
+            _client = new SolrClient(configruation);
             _fieldResolver = fieldResolver ?? new DefaultSolrFieldResolver();
             _serializer = new JsonSerializer
             {
@@ -30,7 +31,7 @@ namespace Solr.Client
         public virtual async Task Add<TDocument>(TDocument document)
         {
             var mappedObject = JToken.FromObject(document, _serializer);
-            await Client.Add(mappedObject);
+            await _client.Add(mappedObject);
         }
 
         public virtual async Task<SolrSearchResult<TDocument>> Search<TDocument>(IQueryable<TDocument> query)
@@ -42,7 +43,7 @@ namespace Solr.Client
             ISolrFieldResolver resultFieldResolver = null)
         {
             var request = new SolrQueryExpressionVisitor(_fieldResolver).Translate(query.Expression);
-            var response = await Client.Get<JToken>(request);
+            var response = await _client.Get<JToken>(request);
             var resultSerializer = new JsonSerializer
             {
                 NullValueHandling = NullValueHandling.Ignore,
@@ -58,19 +59,15 @@ namespace Solr.Client
             return result;
         }
 
-        public SolrClient Client
-        {
-            get
-            {
-                return new SolrClient(_configruation);
-            }
-        }
-
         public async Task Remove(object id)
         {
-            await Client.Remove(id);
+            await _client.Remove(id);
         }
 
+        public void Dispose()
+        {
+            _client.Dispose();
+        }
     }
 
     public class SolrSearchResult<TDocument>

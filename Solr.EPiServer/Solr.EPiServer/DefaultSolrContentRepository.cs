@@ -146,7 +146,7 @@ namespace Solr.EPiServer
             // do dismax queries in the default field
             query.QueryField(fieldResolver.GetDefaultFieldName());
             // get only content links from result
-            var solrResult = await queryRepository.Search<TContent, EpiSolrContentReference>(query);
+            var solrResult = await queryRepository.Search<TContent, EpiSolrContentReference>(query, fieldResolver);
             // replace partial results with full results
             var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
             var completeDocuments = new List<TContent>();

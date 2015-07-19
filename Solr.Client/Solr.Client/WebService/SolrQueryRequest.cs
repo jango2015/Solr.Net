@@ -11,6 +11,9 @@ namespace Solr.Client.WebService
         [JsonProperty(PropertyName = "deftype")]
         public string QueryType { get; set; }
 
+        [JsonProperty(PropertyName = "qf")]
+        public List<string> QueryFields = new List<string>();
+
         public class JsonNode
         {
             private string _query = string.Empty;

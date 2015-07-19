@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Solr.Client;
-using Solr.Client.WebService;
 
 namespace Solr.EPiServer
 {

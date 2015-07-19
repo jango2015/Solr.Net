@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
@@ -42,11 +43,16 @@ namespace Solr.Client.WebService
         public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQueryRequest request)
         {
             var settings = GetSettings();
-            var content = new FormUrlEncodedContent(new List<KeyValuePair<string, string>>
+            var keyValuePairs = new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("json", JsonConvert.SerializeObject(request.Json, settings)),
                 new KeyValuePair<string, string>("deftype", request.QueryType)
-            });
+            };
+            if (request.QueryFields.Any())
+            {
+                keyValuePairs.Add(new KeyValuePair<string, string>("qf", string.Join(" ", request.QueryFields)));
+            }
+            var content = new FormUrlEncodedContent(keyValuePairs);
             // post
             return await PostAsync<SolrQueryResponse<TDocument>>(_configuration.QueryUrl, content);
         }

@@ -36,6 +36,9 @@ namespace Solr.Client.Linq
                         _result.Json.Query = _luceneExpressionVisitor.Translate(node.Arguments[1]);
                         _result.QueryType = node.Arguments[2].Invoke<string>();
                         break;
+                    case "QueryField":
+                        _result.QueryFields.Add(_luceneExpressionVisitor.Translate(node.Arguments[1]));
+                        break;
                     case "Filter":
                         _result.Json.Filters.Add(_luceneExpressionVisitor.Translate(node.Arguments[1]));
                         break;
