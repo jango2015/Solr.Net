@@ -58,7 +58,7 @@ namespace Solr.Client.Linq
                     new[] { @this.Expression, expression }));
         }
 
-        public static IQueryable<TDocument> For<TDocument>(
+        public static IQueryable<TDocument> SearchFor<TDocument>(
             this IQueryable<TDocument> @this,
             Expression<Func<TDocument, object>> expression,
             string queryType = "lucene")
@@ -70,7 +70,7 @@ namespace Solr.Client.Linq
                     new[] { @this.Expression, expression, Expression.Constant(queryType) }));
         }
 
-        public static IQueryable<TDocument> For<TDocument>(
+        public static IQueryable<TDocument> SearchFor<TDocument>(
             this IQueryable<TDocument> @this,
             string query,
             string queryType = "dismax")

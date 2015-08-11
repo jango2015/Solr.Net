@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -87,7 +88,7 @@ namespace Solr.Client.Linq
                     _query.Append("\"");
                     break;
                 default:
-                    _query.Append(node.Value);
+                    _query.AppendFormat(CultureInfo.InvariantCulture, "{0}", node.Value);
                     break;
             }
             return node;

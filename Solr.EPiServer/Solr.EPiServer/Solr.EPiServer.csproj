@@ -182,6 +182,7 @@
     <Compile Include="EpiSolrConfiguration.cs" />
     <Compile Include="EpiSolrFieldResolver.cs" />
     <Compile Include="DefaultSolrContentRepository.cs" />
+    <Compile Include="EpiSolrSearchProvider.cs" />
     <Compile Include="Helpers\HtmlAgilityPackHelper.cs" />
     <Compile Include="EpiSolrInitialization.cs" />
     <Compile Include="ISolrContentRepository.cs" />

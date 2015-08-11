@@ -27,7 +27,7 @@ namespace Solr.Client.Test
             // ensure deleted
             await _repository.Remove("test1");
             // verify
-            var r1 = await _repository.Search(new SolrQuery<TechProduct>().For(x => x.Id == "test1"));
+            var r1 = await _repository.Search(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1"));
             Assert.AreEqual(0, r1.NumFound);
             // add
             var lastModified = DateTime.Now.AddDays(-1);
@@ -38,7 +38,7 @@ namespace Solr.Client.Test
                 LastModified = lastModified
             });
             // verify
-            var r2 = await _repository.Search(new SolrQuery<TechProduct>().For(x => x.Id == "test1"));
+            var r2 = await _repository.Search(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1"));
             Assert.AreEqual(1, r2.NumFound);
             var readLastModified = r2.Documents.First().LastModified;
             Assert.IsNotNull(readLastModified);
@@ -47,21 +47,21 @@ namespace Solr.Client.Test
             // delete
             await _repository.Remove("test1");
             // verify
-            var r3 = await _repository.Search(new SolrQuery<TechProduct>().For(x => x.Id == "test1").Take(10));
+            var r3 = await _repository.Search(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1").Take(10));
             Assert.AreEqual(0, r3.NumFound);
         }
 
         [TestMethod]
         public async Task Filter1()
         {
-            var r3 = await _repository.Search(new SolrQuery<TechProduct>().For("*", "lucene").Filter(x => x.Title.Contains("volapyk")));
+            var r3 = await _repository.Search(new SolrQuery<TechProduct>().SearchFor("*", "lucene").Filter(x => x.Title.Contains("volapyk")));
             Assert.AreEqual(0, r3.NumFound);
         }
 
         [TestMethod]
         public async Task Facet1()
         {
-            var termsFacetFor = new SolrQuery<TechProduct>().For("*", "lucene").Take(0).TermsFacetFor(x => x.Category);
+            var termsFacetFor = new SolrQuery<TechProduct>().SearchFor("*", "lucene").Take(0).TermsFacetFor(x => x.Category);
             termsFacetFor = termsFacetFor.RangeFacetFor(x => x.Popularity, x => x.Range(5, 10, "1"));
             termsFacetFor = termsFacetFor.RangeFacetFor(x => x.ManufactureDate,
                 x =>

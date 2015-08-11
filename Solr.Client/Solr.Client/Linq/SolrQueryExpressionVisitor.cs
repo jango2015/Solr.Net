@@ -39,7 +39,7 @@ namespace Solr.Client.Linq
                 Visit(node.Arguments[0]);
                 switch (method.Name)
                 {
-                    case "For":
+                    case "SearchFor":
                         _result.Json.Query = LuceneExpressionVisitor.Translate(node.Arguments[1]);
                         _result.QueryType = node.Arguments[2].Invoke<string>();
                         break;
