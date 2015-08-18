@@ -8,7 +8,7 @@ namespace Solr.Client.WebService
         public SolrAddRequest Add { get; set; }
 
         [JsonProperty(PropertyName = "delete", NullValueHandling = NullValueHandling.Ignore)]
-        public SolrDeleteRequest Remove { get; set; }
+        public ISolrDeleteRequest Remove { get; set; }
 
         [JsonProperty(PropertyName = "commit", NullValueHandling = NullValueHandling.Ignore)]
         public object Commit { get; set; }

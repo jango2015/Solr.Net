@@ -71,13 +71,15 @@
     <Compile Include="SolrRepository.cs" />
     <Compile Include="Serialization\DefaultSolrFieldResolver.cs" />
     <Compile Include="Linq\SolrLiteral.cs" />
+    <Compile Include="WebService\ISolrDeleteRequest.cs" />
     <Compile Include="WebService\ISolrQueryFacet.cs" />
     <Compile Include="WebService\SolrAddRequest.cs" />
     <Compile Include="WebService\SolrClient.cs" />
     <Compile Include="Serialization\SolrContractResolver.cs" />
-    <Compile Include="WebService\SolrDeleteRequest.cs" />
+    <Compile Include="WebService\SolrDeleteIdRequest.cs" />
     <Compile Include="Linq\SolrQuery.cs" />
     <Compile Include="Linq\SolrQueryProvider.cs" />
+    <Compile Include="WebService\SolrDeleteQueryRequest.cs" />
     <Compile Include="WebService\SolrQueryResponse.cs" />
     <Compile Include="WebService\SolrQueryRequest.cs" />
     <Compile Include="WebService\SolrUpdateRequest.cs" />

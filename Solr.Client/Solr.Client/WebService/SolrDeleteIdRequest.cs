@@ -2,9 +2,9 @@ using Newtonsoft.Json;
 
 namespace Solr.Client.WebService
 {
-    public class SolrDeleteRequest
+    public class SolrDeleteIdRequest : ISolrDeleteRequest
     {
-        public SolrDeleteRequest(object id)
+        public SolrDeleteIdRequest(object id)
         {
             Id = id;
         }

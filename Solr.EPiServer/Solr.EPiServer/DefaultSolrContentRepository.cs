@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Castle.Core.Internal;
 using EPiServer;
+using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Core;
 using EPiServer.DataAnnotations;
 using EPiServer.Logging;
@@ -16,12 +17,13 @@ using Solr.EPiServer.Helpers;
 
 namespace Solr.EPiServer
 {
-    [ServiceConfiguration(ServiceType = typeof(ISolrContentRepository), Lifecycle = ServiceInstanceScope.HttpContext)]
+    [ServiceConfiguration(ServiceType = typeof(ISolrContentRepository), Lifecycle = ServiceInstanceScope.Hybrid)]
     public class DefaultSolrContentRepository : ISolrContentRepository
     {
         private readonly ISolrConfiguration _solrConfiguration;
         private readonly ILogger _logger;
         private readonly HashSet<string> _mandatoryAttributes = new HashSet<string> { "PageName" };
+        private readonly Guid _commerceSiteId = Guid.Empty;
 
         private const string FieldNameId = "id";
         private const string FieldNameType = "_types_ss";
@@ -37,14 +39,19 @@ namespace Solr.EPiServer
 
         public async Task Add(Guid siteDefinitionId, ContentReference contentReference, IContent newContent = null)
         {
+            var contentReferenceId = GetContentReferenceId(contentReference);
             _logger.Log(Level.Information, string.Format("Indexing contentReference {0}", contentReference.ID));
+            var languageBranches = GetLanguageBranches(contentReference, newContent).ToList();
+            if (!languageBranches.Any()) return;
+            var anyContent = languageBranches.First();
+            var isCommerceContent = anyContent is CatalogContentBase;
             var documentContent = new Dictionary<string, object>
             {
-                {FieldNameId, contentReference.ID},
-                {FieldNameSite, siteDefinitionId.ToString("D")},
-                {FieldNameType, GetInheritancHierarchy(newContent.GetOriginalType()).Select(x => x.FullName)}
+                {FieldNameId, contentReferenceId},
+                {FieldNameSite, (isCommerceContent ? _commerceSiteId : siteDefinitionId).ToString("D")},
+                {FieldNameType, GetInheritancHierarchy(anyContent.GetOriginalType()).Select(x => x.FullName)}
             };
-            foreach (var languageBranch in GetLanguageBranches(contentReference, newContent))
+            foreach (var languageBranch in languageBranches)
             {
                 var languageName = GetLanguage(languageBranch);
                 try
@@ -69,7 +76,7 @@ namespace Solr.EPiServer
                         {
                             _logger.Log(Level.Error,
                                 string.Format("Duplicate property {0} when adding content reference {1}", fieldName,
-                                    contentReference.ID));
+                                    contentReferenceId));
                             continue;
                         }
                         // handle different types
@@ -106,19 +113,6 @@ namespace Solr.EPiServer
             await updateRepository.Add(documentContent);
         }
 
-        private static void AddOrReplace(IDictionary<string, object> dictionary, string key, object value)
-        {
-            if (dictionary.ContainsKey(key)) dictionary[key] = value;
-            else dictionary.Add(key, value);
-        }
-
-        private static string GetLanguage(IContentData content)
-        {
-            return content == null || content.Property == null || content.Property.LanguageBranch == null
-                ? null
-                : content.Property.LanguageBranch;
-        }
-
         public async Task<EpiSolrSearchResult<TContent>> Search<TContent>(IQueryable<TContent> query,
             CultureInfo language = null, Guid? siteDefinitionId = null) where TContent : IContent
         {
@@ -140,9 +134,14 @@ namespace Solr.EPiServer
                         SolrLiteral.String(startName) == SolrLiteral.String("[* TO NOW/HOUR+1HOUR]") &&
                         SolrLiteral.String(endName) == SolrLiteral.String("[NOW/HOUR TO *]"));
             }
-            // filter on site
+            // filter on current site and all commerce content (zero-guid)
             var siteId = siteDefinitionId.GetValueOrDefault(SiteDefinition.Current.Id).ToString("D");
-            query = query.Filter(x => SolrLiteral.String(FieldNameSite) == siteId);
+            var commerceSiteId = _commerceSiteId.ToString("D");
+            query =
+                query.Filter(
+                    x =>
+                        SolrLiteral.String(FieldNameSite) == siteId ||
+                        SolrLiteral.String(FieldNameSite) == commerceSiteId);
             // do dismax queries in the default field
             query = query.QueryField(fieldResolver.GetDefaultFieldName());
             // get only content links from result
@@ -171,7 +170,35 @@ namespace Solr.EPiServer
         public async Task Remove(ContentReference contentReference)
         {
             var updateRepository = new SolrRepository(_solrConfiguration);
-            await updateRepository.Remove(contentReference.ID);
+            await updateRepository.Remove(GetContentReferenceId(contentReference));
+        }
+
+        public async Task RemoveAll(Guid siteDefinitionId)
+        {
+            var updateRepository = new SolrRepository(_solrConfiguration);
+            var stringId = siteDefinitionId.ToString("D");
+            await
+                updateRepository.Remove<object>(x => SolrLiteral.String(FieldNameSite) == stringId);
+        }
+
+        public async Task RemoveAllCommerceContent()
+        {
+            await RemoveAll(_commerceSiteId);
+        }
+
+        private static void AddOrReplace(IDictionary<string, object> dictionary, string key, object value)
+        {
+            if (dictionary.ContainsKey(key)) dictionary[key] = value;
+            else dictionary.Add(key, value);
+        }
+
+        private static string GetLanguage(IContentData content)
+        {
+            var commerceContent = content as CatalogContentBase;
+            if (commerceContent != null) return commerceContent.Language.Name;
+            return content == null || content.Property == null || content.Property.LanguageBranch == null
+                ? null
+                : content.Property.LanguageBranch;
         }
 
         private static IEnumerable<IContent> GetLanguageBranches(ContentReference contentReference, IContent newContent)
@@ -184,8 +211,9 @@ namespace Solr.EPiServer
             var newContentLanguageExists = false;
             foreach (var languageBranch in existingLanguageBranches)
             {
-                if (string.Equals(GetLanguage(languageBranch), newContentLanguage,
-                    StringComparison.InvariantCultureIgnoreCase))
+                if (newContent != null &&
+                    string.Equals(GetLanguage(languageBranch), newContentLanguage,
+                        StringComparison.InvariantCultureIgnoreCase))
                 {
                     newContentLanguageExists = true;
                     yield return newContent;
@@ -195,13 +223,13 @@ namespace Solr.EPiServer
                     yield return languageBranch;
                 }
             }
-            if (!newContentLanguageExists)
+            if (!newContentLanguageExists && newContent != null)
             {
                 yield return newContent;
             }
         }
 
-        public static IEnumerable<Type> GetInheritancHierarchy(Type type)
+        private static IEnumerable<Type> GetInheritancHierarchy(Type type)
         {
             for (var current = type; current != null; current = current.BaseType)
             {
@@ -211,6 +239,13 @@ namespace Solr.EPiServer
             {
                 yield return @interface;
             }
+        }
+
+        private static string GetContentReferenceId(ContentReference contentReference)
+        {
+            return contentReference.ProviderName == null
+                ? contentReference.ID.ToString(CultureInfo.InvariantCulture)
+                : string.Format("{0}_{1}", contentReference.ID, contentReference.ProviderName);
         }
     }
 }

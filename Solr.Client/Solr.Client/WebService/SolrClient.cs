@@ -57,11 +57,21 @@ namespace Solr.Client.WebService
             return await PostAsync<SolrQueryResponse<TDocument>>(_configuration.QueryUrl, content);
         }
 
-        public async Task Remove(object id, bool commit = true)
+        public async Task RemoveById(object id, bool commit = true)
         {
             var request = new SolrUpdateRequest
             {
-                Remove = new SolrDeleteRequest(id),
+                Remove = new SolrDeleteIdRequest(id),
+                Commit = commit ? new object() : null
+            };
+            await PostAsync<SolrResponse>(_configuration.UpdateUrl, request);
+        }
+
+        public async Task RemoveByQuery(string query, bool commit = true)
+        {
+            var request = new SolrUpdateRequest
+            {
+                Remove = new SolrDeleteQueryRequest(query),
                 Commit = commit ? new object() : null
             };
             await PostAsync<SolrResponse>(_configuration.UpdateUrl, request);

@@ -1,4 +1,5 @@
-﻿using EPiServer;
+﻿using System;
+using EPiServer;
 using EPiServer.Core;
 using EPiServer.Framework;
 using EPiServer.Framework.Initialization;
@@ -14,10 +15,19 @@ namespace Solr.EPiServer
         public void Initialize(InitializationEngine context)
         {
             var contentEvents = ServiceLocator.Current.GetInstance<IContentEvents>();
-            contentEvents.PublishedContent += ContentEventsOnPublishedContent;
+            contentEvents.DeletedContent += ContentEventsOnDeletedContent;
+            contentEvents.DeletedContentLanguage += ContentEventsOnPublishedContent;
+            contentEvents.DeletedContentVersion += ContentEventsOnPublishedContent;
             contentEvents.MovedContent += ContentEventsOnPublishedContent;
+            contentEvents.PublishedContent += ContentEventsOnPublishedContent;
         }
-        
+
+        private static async void ContentEventsOnDeletedContent(object sender, DeleteContentEventArgs deleteContentEventArgs)
+        {
+            var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
+            await solrContentRepository.Remove(deleteContentEventArgs.ContentLink);
+        }
+
         private static async void ContentEventsOnPublishedContent(object sender, ContentEventArgs contentEventArgs)
         {
             var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -60,9 +61,15 @@ namespace Solr.Client
             return result;
         }
 
+        public async Task Remove<TDocument>(Expression<Func<TDocument, object>> query)
+        {
+            var queryString = new SolrLuceneExpressionVisitor(_fieldResolver).Translate(query);
+            await _client.RemoveByQuery(queryString);
+        }
+
         public async Task Remove(object id)
         {
-            await _client.Remove(id);
+            await _client.RemoveById(id);
         }
 
         public void Dispose()

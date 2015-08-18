@@ -14,5 +14,7 @@ namespace Solr.EPiServer
             Guid? siteDefinitionId = null) where TContent : IContent;
 
         Task Remove(ContentReference contentLink);
+        Task RemoveAll(Guid siteDefinitionId);
+        Task RemoveAllCommerceContent();
     }
 }
