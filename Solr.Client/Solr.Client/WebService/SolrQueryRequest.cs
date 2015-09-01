@@ -9,14 +9,23 @@ namespace Solr.Client.WebService
         public JsonNode Json = new JsonNode();
 
         [JsonProperty(PropertyName = "deftype")]
-        public string QueryType { get; set; }
+        public string QueryType
+        {
+            get { return _queryType; }
+            set { _queryType = value; }
+        }
+
+        [JsonProperty(PropertyName = "sort", NullValueHandling = NullValueHandling.Ignore)]
+        public string Sort { get; set; }
 
         [JsonProperty(PropertyName = "qf")]
         public List<string> QueryFields = new List<string>();
 
+        private string _queryType = "lucene";
+
         public class JsonNode
         {
-            private string _query = string.Empty;
+            private string _query = "*";
             private readonly List<string> _filters = new List<string>();
             private readonly Dictionary<string, ISolrQueryFacet> _facets = new Dictionary<string, ISolrQueryFacet>();
 

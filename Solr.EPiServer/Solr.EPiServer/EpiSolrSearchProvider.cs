@@ -38,7 +38,7 @@ namespace Solr.EPiServer
                 // now index
                 var siteDefinitionId = Guid.Empty; // commerce content is not site specific
                 var contentReference = new ContentReference(contentId, CommerceProviderName);
-                _solrRepository.Add(siteDefinitionId, contentReference).Wait();
+                _solrRepository.AddAsync(siteDefinitionId, contentReference).Wait();
             }
             catch (Exception ex)
             {
@@ -51,7 +51,7 @@ namespace Solr.EPiServer
             if (key == "_id")
             {
                 var contentId = int.Parse(value);
-                _solrRepository.Remove(new ContentReference(contentId, CommerceProviderName)).Wait();
+                _solrRepository.RemoveAsync(new ContentReference(contentId, CommerceProviderName)).Wait();
                 _history.Remove(contentId);
             }
             else
@@ -65,7 +65,7 @@ namespace Solr.EPiServer
 
         public override void RemoveAll(string applicationName, string scope)
         {
-            _solrRepository.RemoveAllCommerceContent().Wait();
+            _solrRepository.RemoveAllCommerceContentAsync().Wait();
         }
 
         public override void Close(string applicationName, string scope)

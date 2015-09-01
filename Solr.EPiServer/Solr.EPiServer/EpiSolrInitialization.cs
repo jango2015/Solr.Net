@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Threading.Tasks;
 using EPiServer;
 using EPiServer.Core;
 using EPiServer.Framework;
@@ -22,24 +22,24 @@ namespace Solr.EPiServer
             contentEvents.PublishedContent += ContentEventsOnPublishedContent;
         }
 
-        private static async void ContentEventsOnDeletedContent(object sender, DeleteContentEventArgs deleteContentEventArgs)
+        private static void ContentEventsOnDeletedContent(object sender, DeleteContentEventArgs deleteContentEventArgs)
         {
             var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
-            await solrContentRepository.Remove(deleteContentEventArgs.ContentLink);
+            StartAndWait(solrContentRepository.RemoveAsync(deleteContentEventArgs.ContentLink));
         }
 
-        private static async void ContentEventsOnPublishedContent(object sender, ContentEventArgs contentEventArgs)
+        private static void ContentEventsOnPublishedContent(object sender, ContentEventArgs contentEventArgs)
         {
             var solrContentRepository = ServiceLocator.Current.GetInstance<ISolrContentRepository>();
             if (ContentIsInvalid(contentEventArgs))
             {
                 // remove
-                await solrContentRepository.Remove(contentEventArgs.ContentLink);
+                StartAndWait(solrContentRepository.RemoveAsync(contentEventArgs.ContentLink));
             }
             else
             {
                 // update index at new url
-                await solrContentRepository.Add(SiteDefinition.Current.Id, contentEventArgs.ContentLink, contentEventArgs.Content);
+                StartAndWait(solrContentRepository.AddAsync(SiteDefinition.Current.Id, contentEventArgs.ContentLink, contentEventArgs.Content));
             }
         }
 
@@ -56,6 +56,11 @@ namespace Solr.EPiServer
             var contentEvents = ServiceLocator.Current.GetInstance<IContentEvents>();
             contentEvents.PublishedContent -= ContentEventsOnPublishedContent;
             contentEvents.MovedContent -= ContentEventsOnPublishedContent;
+        }
+
+        private static void StartAndWait(Task task)
+        {
+            task.ConfigureAwait(false);
         }
     }
 }

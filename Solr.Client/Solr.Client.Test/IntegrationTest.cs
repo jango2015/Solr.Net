@@ -22,44 +22,44 @@ namespace Solr.Client.Test
         }
         
         [TestMethod]
-        public async Task RemoveDocument()
+        public async Task RemoveDocumentAsync()
         {
             // ensure deleted
-            await _repository.Remove("test1");
+            await _repository.RemoveAsync("test1");
             // verify
-            var r1 = await _repository.Search(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1"));
+            var r1 = await _repository.SearchAsync(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1"));
             Assert.AreEqual(0, r1.NumFound);
             // add
             var lastModified = DateTime.Now.AddDays(-1);
-            await _repository.Add(new TechProduct
+            await _repository.AddAsync(new TechProduct
             {
                 Id = "test1",
                 Title = new[]{"UnitTest2"},
                 LastModified = lastModified
             });
             // verify
-            var r2 = await _repository.Search(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1"));
+            var r2 = await _repository.SearchAsync(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1"));
             Assert.AreEqual(1, r2.NumFound);
             var readLastModified = r2.Documents.First().LastModified;
             Assert.IsNotNull(readLastModified);
             // ignore fragments of a second with tostring
             Assert.AreEqual(lastModified.ToString("R"), readLastModified.Value.ToString("R"));
             // delete
-            await _repository.Remove("test1");
+            await _repository.RemoveAsync("test1");
             // verify
-            var r3 = await _repository.Search(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1").Take(10));
+            var r3 = await _repository.SearchAsync(new SolrQuery<TechProduct>().SearchFor(x => x.Id == "test1").Take(10));
             Assert.AreEqual(0, r3.NumFound);
         }
 
         [TestMethod]
-        public async Task Filter1()
+        public async Task Filter1Async()
         {
-            var r3 = await _repository.Search(new SolrQuery<TechProduct>().SearchFor("*", "lucene").Filter(x => x.Title.Contains("volapyk")));
+            var r3 = await _repository.SearchAsync(new SolrQuery<TechProduct>().SearchFor("*", "lucene").Filter(x => x.Title.Contains("volapyk")));
             Assert.AreEqual(0, r3.NumFound);
         }
 
         [TestMethod]
-        public async Task Facet1()
+        public async Task Facet1Async()
         {
             var termsFacetFor = new SolrQuery<TechProduct>().SearchFor("*", "lucene").Take(0).TermsFacetFor(x => x.Category);
             termsFacetFor = termsFacetFor.RangeFacetFor(x => x.Popularity, x => x.Range(5, 10, "1"));
@@ -68,7 +68,7 @@ namespace Solr.Client.Test
                     x.Range(DateTime.Now.AddYears(-20), DateTime.Now, "+1YEAR")
                         .TermsFacetFor(y => y.Category,
                             y => y.RangeFacetFor(z => z.Popularity, z => z.Range(5, 10, "1"))));
-            var searchResult = await _repository.Search(termsFacetFor);
+            var searchResult = await _repository.SearchAsync(termsFacetFor);
             var bucket = searchResult.Raw.Facets["R2"]["buckets"].ToList()[10]["T0"]["buckets"].ToList()[0]["R0"]["buckets"].ToList()[1];
             Assert.AreEqual(6, bucket["val"]);
             Assert.AreEqual(2, bucket["count"]);

@@ -8,6 +8,7 @@ using EPiServer;
 using EPiServer.Commerce.Catalog.ContentTypes;
 using EPiServer.Core;
 using EPiServer.DataAnnotations;
+using EPiServer.Globalization;
 using EPiServer.Logging;
 using EPiServer.ServiceLocation;
 using EPiServer.Web;
@@ -37,7 +38,7 @@ namespace Solr.EPiServer
             _logger = logger;
         }
 
-        public async Task Add(Guid siteDefinitionId, ContentReference contentReference, IContent newContent = null)
+        public async Task AddAsync(Guid siteDefinitionId, ContentReference contentReference, IContent newContent = null)
         {
             var contentReferenceId = GetContentReferenceId(contentReference);
             _logger.Log(Level.Information, string.Format("Indexing contentReference {0}", contentReference.ID));
@@ -110,13 +111,13 @@ namespace Solr.EPiServer
                 }
             }
             var updateRepository = new SolrRepository(_solrConfiguration);
-            await updateRepository.Add(documentContent);
+            await updateRepository.AddAsync(documentContent);
         }
 
-        public async Task<EpiSolrSearchResult<TContent>> Search<TContent>(IQueryable<TContent> query,
+        public async Task<EpiSolrSearchResult<TContent>> SearchAsync<TContent>(IQueryable<TContent> query,
             CultureInfo language = null, Guid? siteDefinitionId = null) where TContent : IContent
         {
-            var fieldResolver = new EpiSolrFieldResolver(language ?? LanguageSelector.AutoDetect(false).Language);
+            var fieldResolver = new EpiSolrFieldResolver(language ?? ContentLanguage.PreferredCulture);
             var queryRepository = new SolrRepository(_solrConfiguration, fieldResolver);
             // add type condition
             var contentType = typeof (TContent).FullName;
@@ -145,7 +146,7 @@ namespace Solr.EPiServer
             // do dismax queries in the default field
             query = query.QueryField(fieldResolver.GetDefaultFieldName());
             // get only content links from result
-            var solrResult = await queryRepository.Search<TContent, EpiSolrContentReference>(query, fieldResolver);
+            var solrResult = await queryRepository.SearchAsync<TContent, EpiSolrContentReference>(query, fieldResolver);
             // replace partial results with full results
             var contentRepository = ServiceLocator.Current.GetInstance<IContentRepository>();
             var completeDocuments = new List<TContent>();
@@ -167,23 +168,23 @@ namespace Solr.EPiServer
             return finalResult;
         }
 
-        public async Task Remove(ContentReference contentReference)
+        public async Task RemoveAsync(ContentReference contentReference)
         {
             var updateRepository = new SolrRepository(_solrConfiguration);
-            await updateRepository.Remove(GetContentReferenceId(contentReference));
+            await updateRepository.RemoveAsync(GetContentReferenceId(contentReference));
         }
 
-        public async Task RemoveAll(Guid siteDefinitionId)
+        public async Task RemoveAllAsync(Guid siteDefinitionId)
         {
             var updateRepository = new SolrRepository(_solrConfiguration);
             var stringId = siteDefinitionId.ToString("D");
             await
-                updateRepository.Remove<object>(x => SolrLiteral.String(FieldNameSite) == stringId);
+                updateRepository.RemoveAsync<object>(x => SolrLiteral.String(FieldNameSite) == stringId);
         }
 
-        public async Task RemoveAllCommerceContent()
+        public async Task RemoveAllCommerceContentAsync()
         {
-            await RemoveAll(_commerceSiteId);
+            await RemoveAllAsync(_commerceSiteId);
         }
 
         private static void AddOrReplace(IDictionary<string, object> dictionary, string key, object value)

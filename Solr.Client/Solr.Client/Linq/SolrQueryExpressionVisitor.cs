@@ -63,6 +63,18 @@ namespace Solr.Client.Linq
                     case "Skip":
                         _result.Json.Offset = node.Arguments[1].Invoke<int>();
                         break;
+                    case "OrderBy":
+                        _result.Sort = string.Format("{0} asc", LuceneExpressionVisitor.Translate(node.Arguments[1]));
+                        break;
+                    case "OrderByDescending":
+                        _result.Sort = string.Format("{0} desc", LuceneExpressionVisitor.Translate(node.Arguments[1]));
+                        break;
+                    case "ThenBy":
+                        _result.Sort = string.Format("{0}, {1} asc", _result.Sort, LuceneExpressionVisitor.Translate(node.Arguments[1]));
+                        break;
+                    case "ThenByDescending":
+                        _result.Sort = string.Format("{0}, {1} desc", _result.Sort, LuceneExpressionVisitor.Translate(node.Arguments[1]));
+                        break;
                     default:
                         throw NotSupported();
                 }

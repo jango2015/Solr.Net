@@ -29,22 +29,22 @@ namespace Solr.Client
             _serializer.Converters.Add(new SolrDateTimeConverter());
         }
 
-        public virtual async Task Add<TDocument>(TDocument document)
+        public virtual async Task AddAsync<TDocument>(TDocument document)
         {
             var mappedObject = JToken.FromObject(document, _serializer);
-            await _client.Add(mappedObject);
+            await _client.AddAsync(mappedObject);
         }
 
-        public virtual async Task<SolrSearchResult<TDocument>> Search<TDocument>(IQueryable<TDocument> query)
+        public virtual async Task<SolrSearchResult<TDocument>> SearchAsync<TDocument>(IQueryable<TDocument> query)
         {
-            return await Search<TDocument, TDocument>(query, _fieldResolver);
+            return await SearchAsync<TDocument, TDocument>(query, _fieldResolver);
         }
 
-        public virtual async Task<SolrSearchResult<TResult>> Search<TDocument, TResult>(IQueryable<TDocument> query,
+        public virtual async Task<SolrSearchResult<TResult>> SearchAsync<TDocument, TResult>(IQueryable<TDocument> query,
             ISolrFieldResolver resultFieldResolver = null)
         {
             var request = new SolrQueryExpressionVisitor(_fieldResolver).Translate(query.Expression);
-            var response = await _client.Get<JToken>(request);
+            var response = await _client.GetAsync<JToken>(request);
             var resultSerializer = new JsonSerializer
             {
                 NullValueHandling = NullValueHandling.Ignore,
@@ -61,15 +61,15 @@ namespace Solr.Client
             return result;
         }
 
-        public async Task Remove<TDocument>(Expression<Func<TDocument, object>> query)
+        public async Task RemoveAsync<TDocument>(Expression<Func<TDocument, object>> query)
         {
             var queryString = new SolrLuceneExpressionVisitor(_fieldResolver).Translate(query);
-            await _client.RemoveByQuery(queryString);
+            await _client.RemoveByQueryAsync(queryString);
         }
 
-        public async Task Remove(object id)
+        public async Task RemoveAsync(object id)
         {
-            await _client.RemoveById(id);
+            await _client.RemoveByIdAsync(id);
         }
 
         public void Dispose()

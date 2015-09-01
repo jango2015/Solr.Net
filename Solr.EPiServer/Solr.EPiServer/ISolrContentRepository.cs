@@ -8,13 +8,13 @@ namespace Solr.EPiServer
 {
     public interface ISolrContentRepository
     {
-        Task Add(Guid siteDefinitionId, ContentReference contentReference, IContent content = null);
+        Task AddAsync(Guid siteDefinitionId, ContentReference contentReference, IContent content = null);
 
-        Task<EpiSolrSearchResult<TContent>> Search<TContent>(IQueryable<TContent> query, CultureInfo language = null,
+        Task<EpiSolrSearchResult<TContent>> SearchAsync<TContent>(IQueryable<TContent> query, CultureInfo language = null,
             Guid? siteDefinitionId = null) where TContent : IContent;
 
-        Task Remove(ContentReference contentLink);
-        Task RemoveAll(Guid siteDefinitionId);
-        Task RemoveAllCommerceContent();
+        Task RemoveAsync(ContentReference contentLink);
+        Task RemoveAllAsync(Guid siteDefinitionId);
+        Task RemoveAllCommerceContentAsync();
     }
 }

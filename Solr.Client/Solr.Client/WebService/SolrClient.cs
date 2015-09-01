@@ -23,13 +23,13 @@ namespace Solr.Client.WebService
             _logger = LogManager.GetLogger(GetType());
         }
 
-        public async Task Commit()
+        public async Task CommitAsync()
         {
             var request = new SolrUpdateRequest {Commit = new object()};
             await PostAsync<SolrResponse>(_configuration.UpdateUrl, request);
         }
 
-        public async Task Add<TDocument>(TDocument document, bool commit = true)
+        public async Task AddAsync<TDocument>(TDocument document, bool commit = true)
         {
             var request = new SolrUpdateRequest
             {
@@ -40,7 +40,7 @@ namespace Solr.Client.WebService
             await PostAsync<SolrResponse>(_configuration.UpdateUrl, request, settings);
         }
 
-        public async Task<SolrQueryResponse<TDocument>> Get<TDocument>(SolrQueryRequest request)
+        public async Task<SolrQueryResponse<TDocument>> GetAsync<TDocument>(SolrQueryRequest request)
         {
             var settings = GetSettings();
             var keyValuePairs = new List<KeyValuePair<string, string>>
@@ -52,12 +52,16 @@ namespace Solr.Client.WebService
             {
                 keyValuePairs.Add(new KeyValuePair<string, string>("qf", string.Join(" ", request.QueryFields)));
             }
+            if (!string.IsNullOrWhiteSpace(request.Sort))
+            {
+                keyValuePairs.Add(new KeyValuePair<string, string>("sort", request.Sort));
+            }
             var content = new FormUrlEncodedContent(keyValuePairs);
             // post
             return await PostAsync<SolrQueryResponse<TDocument>>(_configuration.QueryUrl, content);
         }
 
-        public async Task RemoveById(object id, bool commit = true)
+        public async Task RemoveByIdAsync(object id, bool commit = true)
         {
             var request = new SolrUpdateRequest
             {
@@ -67,7 +71,7 @@ namespace Solr.Client.WebService
             await PostAsync<SolrResponse>(_configuration.UpdateUrl, request);
         }
 
-        public async Task RemoveByQuery(string query, bool commit = true)
+        public async Task RemoveByQueryAsync(string query, bool commit = true)
         {
             var request = new SolrUpdateRequest
             {
@@ -90,7 +94,8 @@ namespace Solr.Client.WebService
             JsonSerializerSettings settings = null)
             where TResponse : SolrResponse
         {
-            _logger.Debug(string.Format("Requesting '{0}' with post data: {1}", url, await content.ReadAsStringAsync()));
+            var data = await content.ReadAsStringAsync();
+            _logger.Debug(string.Format("Requesting '{0}' with post data: {1}", url, data));
             var response = await _httpClient.PostAsync(url, content);
             var responseString = await response.Content.ReadAsStringAsync();
             _logger.Debug(string.Format("Received response: {0}", responseString));
